@@ -8,11 +8,11 @@ from playwright.async_api import (BrowserContext, BrowserType, Page,
                                   async_playwright)
 
 import config
-from base.base_crawler import AbstractCrawler
-from proxy.proxy_ip_pool import IpInfoModel, create_ip_pool
-from store import xhs as xhs_store
-from tools import utils
-from var import crawler_type_var
+from funmedia.common.base.base_crawler import AbstractCrawler
+from funmedia.common.proxy.proxy_ip_pool import IpInfoModel, create_ip_pool
+from funmedia.common.store import xhs as xhs_store
+from funmedia.common.tools import utils
+from funmedia.common.var import crawler_type_var
 
 from .client import XiaoHongShuClient
 from .exception import DataFetchError

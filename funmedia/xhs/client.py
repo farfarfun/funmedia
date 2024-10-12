@@ -8,8 +8,9 @@ import httpx
 from playwright.async_api import BrowserContext, Page
 
 import config
-from base.base_crawler import AbstractApiClient
-from tools import utils
+from funmedia.common.base.base_crawler import AbstractApiClient
+from funmedia.common.tools import utils
+
 
 from .exception import DataFetchError, IPBlockError
 from .field import SearchNoteType, SearchSortType
@@ -18,13 +19,13 @@ from .help import get_search_id, sign
 
 class XiaoHongShuClient(AbstractApiClient):
     def __init__(
-            self,
-            timeout=10,
-            proxies=None,
-            *,
-            headers: Dict[str, str],
-            playwright_page: Page,
-            cookie_dict: Dict[str, str],
+        self,
+        timeout=10,
+        proxies=None,
+        *,
+        headers: Dict[str, str],
+        playwright_page: Page,
+        cookie_dict: Dict[str, str],
     ):
         self.proxies = proxies
         self.timeout = timeout
@@ -48,20 +49,22 @@ class XiaoHongShuClient(AbstractApiClient):
         Returns:
 
         """
-        encrypt_params = await self.playwright_page.evaluate("([url, data]) => window._webmsxyw(url,data)", [url, data])
+        encrypt_params = await self.playwright_page.evaluate(
+            "([url, data]) => window._webmsxyw(url,data)", [url, data]
+        )
         local_storage = await self.playwright_page.evaluate("() => window.localStorage")
         signs = sign(
             a1=self.cookie_dict.get("a1", ""),
             b1=local_storage.get("b1", ""),
             x_s=encrypt_params.get("X-s", ""),
-            x_t=str(encrypt_params.get("X-t", ""))
+            x_t=str(encrypt_params.get("X-t", "")),
         )
 
         headers = {
             "X-S": signs["x-s"],
             "X-T": signs["x-t"],
             "x-S-Common": signs["x-s-common"],
-            "X-B3-Traceid": signs["x-b3-traceid"]
+            "X-B3-Traceid": signs["x-b3-traceid"],
         }
         self.headers.update(headers)
         return self.headers
@@ -78,13 +81,10 @@ class XiaoHongShuClient(AbstractApiClient):
 
         """
         # return response.text
-        return_response = kwargs.pop('return_response', False)
+        return_response = kwargs.pop("return_response", False)
 
         async with httpx.AsyncClient(proxies=self.proxies) as client:
-            response = await client.request(
-                method, url, timeout=self.timeout,
-                **kwargs
-            )
+            response = await client.request(method, url, timeout=self.timeout, **kwargs)
 
         if return_response:
             return response.text
@@ -109,10 +109,11 @@ class XiaoHongShuClient(AbstractApiClient):
         """
         final_uri = uri
         if isinstance(params, dict):
-            final_uri = (f"{uri}?"
-                         f"{urlencode(params)}")
+            final_uri = f"{uri}?" f"{urlencode(params)}"
         headers = await self._pre_headers(final_uri)
-        return await self.request(method="GET", url=f"{self._host}{final_uri}", headers=headers)
+        return await self.request(
+            method="GET", url=f"{self._host}{final_uri}", headers=headers
+        )
 
     async def post(self, uri: str, data: dict) -> Dict:
         """
@@ -125,15 +126,18 @@ class XiaoHongShuClient(AbstractApiClient):
 
         """
         headers = await self._pre_headers(uri, data)
-        json_str = json.dumps(data, separators=(',', ':'), ensure_ascii=False)
-        return await self.request(method="POST", url=f"{self._host}{uri}",
-                                  data=json_str, headers=headers)
+        json_str = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
+        return await self.request(
+            method="POST", url=f"{self._host}{uri}", data=json_str, headers=headers
+        )
 
     async def get_note_media(self, url: str) -> Union[bytes, None]:
         async with httpx.AsyncClient(proxies=self.proxies) as client:
             response = await client.request("GET", url, timeout=self.timeout)
             if not response.reason_phrase == "OK":
-                utils.logger.error(f"[XiaoHongShuClient.get_note_media] request {url} err, res:{response.text}")
+                utils.logger.error(
+                    f"[XiaoHongShuClient.get_note_media] request {url} err, res:{response.text}"
+                )
                 return None
             else:
                 return response.content
@@ -152,7 +156,9 @@ class XiaoHongShuClient(AbstractApiClient):
             if note_card.get("items"):
                 ping_flag = True
         except Exception as e:
-            utils.logger.error(f"[XiaoHongShuClient.pong] Ping xhs failed: {e}, and try to login again...")
+            utils.logger.error(
+                f"[XiaoHongShuClient.pong] Ping xhs failed: {e}, and try to login again..."
+            )
             ping_flag = False
         return ping_flag
 
@@ -170,10 +176,12 @@ class XiaoHongShuClient(AbstractApiClient):
         self.cookie_dict = cookie_dict
 
     async def get_note_by_keyword(
-            self, keyword: str,
-            page: int = 1, page_size: int = 20,
-            sort: SearchSortType = SearchSortType.GENERAL,
-            note_type: SearchNoteType = SearchNoteType.ALL
+        self,
+        keyword: str,
+        page: int = 1,
+        page_size: int = 20,
+        sort: SearchSortType = SearchSortType.GENERAL,
+        note_type: SearchNoteType = SearchNoteType.ALL,
     ) -> Dict:
         """
         根据关键词搜索笔记
@@ -194,11 +202,13 @@ class XiaoHongShuClient(AbstractApiClient):
             "page_size": page_size,
             "search_id": get_search_id(),
             "sort": sort.value,
-            "note_type": note_type.value
+            "note_type": note_type.value,
         }
         return await self.post(uri, data)
 
-    async def get_note_by_id(self, note_id: str, xsec_source: str, xsec_token: str) -> Dict:
+    async def get_note_by_id(
+        self, note_id: str, xsec_source: str, xsec_token: str
+    ) -> Dict:
         """
         获取笔记详情API
         Args:
@@ -217,7 +227,7 @@ class XiaoHongShuClient(AbstractApiClient):
             "image_formats": ["jpg", "webp", "avif"],
             "extra": {"need_body_topic": 1},
             "xsec_source": xsec_source,
-            "xsec_token": xsec_token
+            "xsec_token": xsec_token,
         }
         uri = "/api/sns/web/v1/feed"
         res = await self.post(uri, data)
@@ -225,7 +235,9 @@ class XiaoHongShuClient(AbstractApiClient):
             res_dict: Dict = res["items"][0]["note_card"]
             return res_dict
         # 爬取频繁了可能会出现有的笔记能有结果有的没有
-        utils.logger.error(f"[XiaoHongShuClient.get_note_by_id] get note id:{note_id} empty and res:{res}")
+        utils.logger.error(
+            f"[XiaoHongShuClient.get_note_by_id] get note id:{note_id} empty and res:{res}"
+        )
         return dict()
 
     async def get_note_comments(self, note_id: str, cursor: str = "") -> Dict:
@@ -243,11 +255,13 @@ class XiaoHongShuClient(AbstractApiClient):
             "note_id": note_id,
             "cursor": cursor,
             "top_comment_id": "",
-            "image_formats": "jpg,webp,avif"
+            "image_formats": "jpg,webp,avif",
         }
         return await self.get(uri, params)
 
-    async def get_note_sub_comments(self, note_id: str, root_comment_id: str, num: int = 10, cursor: str = ""):
+    async def get_note_sub_comments(
+        self, note_id: str, root_comment_id: str, num: int = 10, cursor: str = ""
+    ):
         """
         获取指定父评论下的子评论的API
         Args:
@@ -268,8 +282,12 @@ class XiaoHongShuClient(AbstractApiClient):
         }
         return await self.get(uri, params)
 
-    async def get_note_all_comments(self, note_id: str, crawl_interval: float = 1.0,
-                                    callback: Optional[Callable] = None) -> List[Dict]:
+    async def get_note_all_comments(
+        self,
+        note_id: str,
+        crawl_interval: float = 1.0,
+        callback: Optional[Callable] = None,
+    ) -> List[Dict]:
         """
         获取指定笔记下的所有一级评论，该方法会一直查找一个帖子下的所有评论信息
         Args:
@@ -289,19 +307,26 @@ class XiaoHongShuClient(AbstractApiClient):
             comments_cursor = comments_res.get("cursor", "")
             if "comments" not in comments_res:
                 utils.logger.info(
-                    f"[XiaoHongShuClient.get_note_all_comments] No 'comments' key found in response: {comments_res}")
+                    f"[XiaoHongShuClient.get_note_all_comments] No 'comments' key found in response: {comments_res}"
+                )
                 break
             comments = comments_res["comments"]
             if callback:
                 await callback(note_id, comments)
             await asyncio.sleep(crawl_interval)
             result.extend(comments)
-            sub_comments = await self.get_comments_all_sub_comments(comments, crawl_interval, callback)
+            sub_comments = await self.get_comments_all_sub_comments(
+                comments, crawl_interval, callback
+            )
             result.extend(sub_comments)
         return result
 
-    async def get_comments_all_sub_comments(self, comments: List[Dict], crawl_interval: float = 1.0,
-                                            callback: Optional[Callable] = None) -> List[Dict]:
+    async def get_comments_all_sub_comments(
+        self,
+        comments: List[Dict],
+        crawl_interval: float = 1.0,
+        callback: Optional[Callable] = None,
+    ) -> List[Dict]:
         """
         获取指定一级评论下的所有二级评论, 该方法会一直查找一级评论下的所有二级评论信息
         Args:
@@ -310,11 +335,12 @@ class XiaoHongShuClient(AbstractApiClient):
             callback: 一次评论爬取结束后
 
         Returns:
-        
+
         """
         if not config.ENABLE_GET_SUB_COMMENTS:
             utils.logger.info(
-                f"[XiaoHongShuCrawler.get_comments_all_sub_comments] Crawling sub_comment mode is not enabled")
+                f"[XiaoHongShuCrawler.get_comments_all_sub_comments] Crawling sub_comment mode is not enabled"
+            )
             return []
 
         result = []
@@ -332,12 +358,15 @@ class XiaoHongShuClient(AbstractApiClient):
             sub_comment_cursor = comment.get("sub_comment_cursor")
 
             while sub_comment_has_more:
-                comments_res = await self.get_note_sub_comments(note_id, root_comment_id, 10, sub_comment_cursor)
+                comments_res = await self.get_note_sub_comments(
+                    note_id, root_comment_id, 10, sub_comment_cursor
+                )
                 sub_comment_has_more = comments_res.get("has_more", False)
                 sub_comment_cursor = comments_res.get("cursor", "")
                 if "comments" not in comments_res:
                     utils.logger.info(
-                        f"[XiaoHongShuClient.get_comments_all_sub_comments] No 'comments' key found in response: {comments_res}")
+                        f"[XiaoHongShuClient.get_comments_all_sub_comments] No 'comments' key found in response: {comments_res}"
+                    )
                     break
                 comments = comments_res["comments"]
                 if callback:
@@ -353,21 +382,23 @@ class XiaoHongShuClient(AbstractApiClient):
         eg: https://www.xiaohongshu.com/user/profile/59d8cb33de5fb4696bf17217
         """
         uri = f"/user/profile/{user_id}"
-        html_content = await self.request("GET", self._domain + uri, return_response=True, headers=self.headers)
-        match = re.search(r'<script>window.__INITIAL_STATE__=(.+)<\/script>', html_content, re.M)
+        html_content = await self.request(
+            "GET", self._domain + uri, return_response=True, headers=self.headers
+        )
+        match = re.search(
+            r"<script>window.__INITIAL_STATE__=(.+)<\/script>", html_content, re.M
+        )
 
         if match is None:
             return {}
 
-        info = json.loads(match.group(1).replace(':undefined', ':null'), strict=False)
+        info = json.loads(match.group(1).replace(":undefined", ":null"), strict=False)
         if info is None:
             return {}
-        return info.get('user').get('userPageData')
+        return info.get("user").get("userPageData")
 
     async def get_notes_by_creator(
-            self, creator: str,
-            cursor: str,
-            page_size: int = 30
+        self, creator: str, cursor: str, page_size: int = 30
     ) -> Dict:
         """
         获取博主的笔记
@@ -384,12 +415,16 @@ class XiaoHongShuClient(AbstractApiClient):
             "user_id": creator,
             "cursor": cursor,
             "num": page_size,
-            "image_formats": "jpg,webp,avif"
+            "image_formats": "jpg,webp,avif",
         }
         return await self.get(uri, data)
 
-    async def get_all_notes_by_creator(self, user_id: str, crawl_interval: float = 1.0,
-                                       callback: Optional[Callable] = None) -> List[Dict]:
+    async def get_all_notes_by_creator(
+        self,
+        user_id: str,
+        crawl_interval: float = 1.0,
+        callback: Optional[Callable] = None,
+    ) -> List[Dict]:
         """
         获取指定用户下的所有发过的帖子，该方法会一直查找一个用户下的所有帖子信息
         Args:
@@ -407,19 +442,22 @@ class XiaoHongShuClient(AbstractApiClient):
             notes_res = await self.get_notes_by_creator(user_id, notes_cursor)
             if not notes_res:
                 utils.logger.error(
-                    f"[XiaoHongShuClient.get_notes_by_creator] The current creator may have been banned by xhs, so they cannot access the data.")
+                    f"[XiaoHongShuClient.get_notes_by_creator] The current creator may have been banned by xhs, so they cannot access the data."
+                )
                 break
 
             notes_has_more = notes_res.get("has_more", False)
             notes_cursor = notes_res.get("cursor", "")
             if "notes" not in notes_res:
                 utils.logger.info(
-                    f"[XiaoHongShuClient.get_all_notes_by_creator] No 'notes' key found in response: {notes_res}")
+                    f"[XiaoHongShuClient.get_all_notes_by_creator] No 'notes' key found in response: {notes_res}"
+                )
                 break
 
             notes = notes_res["notes"]
             utils.logger.info(
-                f"[XiaoHongShuClient.get_all_notes_by_creator] got user_id:{user_id} notes len : {len(notes)}")
+                f"[XiaoHongShuClient.get_all_notes_by_creator] got user_id:{user_id} notes len : {len(notes)}"
+            )
             if callback:
                 await callback(notes)
             await asyncio.sleep(crawl_interval)
