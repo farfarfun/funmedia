@@ -415,7 +415,7 @@ async def get_latest_version(package_name: str) -> str:
         verify=False,
     ) as aclient:
         try:
-            response = await aclient.get(f"{f2.PYPI_URL}/{package_name}/json")
+            response = await aclient.get(f"{funmedia.PYPI_URL}/{package_name}/json")
             response.raise_for_status()
             package_data = response.json()
             latest_version = package_data["info"]["version"]

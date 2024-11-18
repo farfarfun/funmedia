@@ -16,7 +16,7 @@ from funmedia.log.logger import logger
 
 class ConfigManager:
     # 如果不传入应用配置路径，则返回项目配置 (If the application conf path is not passed in, the project conf is returned)
-    def __init__(self, filepath: str = f2.F2_CONFIG_FILE_PATH):
+    def __init__(self, filepath: str = funmedia.F2_CONFIG_FILE_PATH):
         if Path(filepath).exists():
             self.filepath = Path(filepath)
         else:
@@ -85,7 +85,7 @@ class ConfigManager:
         # 读取默认配置
         default_config = (
             yaml.safe_load(
-                Path(get_resource_path(f2.F2_DEFAULTS_FILE_PATH)).read_text(
+                Path(get_resource_path(funmedia.F2_DEFAULTS_FILE_PATH)).read_text(
                     encoding="utf-8"
                 )
             )
@@ -144,7 +144,7 @@ class TestConfigManager:
 
     @classmethod
     def get_test_config(cls, app_name: str) -> dict:
-        return ConfigManager(f2.TEST_CONFIG_FILE_PATH).get_config(app_name)
+        return ConfigManager(funmedia.TEST_CONFIG_FILE_PATH).get_config(app_name)
 
 
 if __name__ == "__main__":

@@ -69,7 +69,7 @@ def handler_auto_cookie(
 
         # 如果没有提供配置文件，那么使用高频配置文件
         manager = ConfigManager(
-            ctx.params.get("config", get_resource_path(f2.APP_CONFIG_FILE_PATH))
+            ctx.params.get("config", get_resource_path(funmedia.APP_CONFIG_FILE_PATH))
         )
         manager.update_config_with_args("tiktok", cookie=cookie_value)
     except PermissionError:
@@ -203,7 +203,7 @@ def handler_naming(
 @click.option(
     "--mode",
     "-M",
-    type=click.Choice(f2.TIKTOK_MODE_LIST),
+    type=click.Choice(funmedia.TIKTOK_MODE_LIST),
     # default="post",
     # required=True,
     help=_(
@@ -313,7 +313,7 @@ def handler_naming(
 # @click.confirmation_option(prompt='是否要使用命令行的参数更新配置文件?')
 @click.option(
     "--auto-cookie",
-    type=click.Choice(f2.BROWSER_LIST),
+    type=click.Choice(funmedia.BROWSER_LIST),
     # default="none",
     help=_("自动从浏览器获取cookie，使用该命令前请确保关闭所选的浏览器"),
     callback=handler_auto_cookie,
@@ -347,8 +347,8 @@ def tiktok(
     ##################
 
     # 读取低频主配置文件
-    main_manager = ConfigManager(f2.APP_CONFIG_FILE_PATH)
-    main_conf_path = get_resource_path(f2.APP_CONFIG_FILE_PATH)
+    main_manager = ConfigManager(funmedia.APP_CONFIG_FILE_PATH)
+    main_conf_path = get_resource_path(funmedia.APP_CONFIG_FILE_PATH)
     main_conf = main_manager.get_config("tiktok")
 
     # 更新主配置文件中的代理参数

@@ -43,7 +43,7 @@ def handle_version(
     if not value or ctx.resilient_parsing:
         return
 
-    click.echo(f"Version {f2.__version__}")
+    click.echo(f"Version {funmedia.__version__}")
     ctx.exit()
 
 
@@ -84,9 +84,9 @@ async def check_version():
     latest_version = await get_latest_version("f2")
 
     if latest_version:
-        if f2.__version__ > latest_version:
+        if funmedia.__version__ > latest_version:
             message = (
-                f"您当前使用的版本 {f2.__version__} 可能已过时，请考虑及时升级到最新版本 {latest_version}，"
+                f"您当前使用的版本 {funmedia.__version__} 可能已过时，请考虑及时升级到最新版本 {latest_version}，"
                 "使用 pip install -U f2 更新"
             )
             Console().print(
@@ -98,8 +98,8 @@ async def check_version():
                     border_style="red",
                 )
             )
-        elif f2.__version__ == latest_version:
-            message = f"您当前使用的是最新版本：{f2.__version__}"
+        elif funmedia.__version__ == latest_version:
+            message = f"您当前使用的是最新版本：{funmedia.__version__}"
             Console().print(
                 Panel(
                     message, title="版本检查", style="bold green", border_style="green"
@@ -148,7 +148,7 @@ class DynamicGroup(click.Group):
                 executor.submit(run_async_in_thread, check_version())
 
                 # 动态导入app的cli模块
-                module = importlib.import_module(f"f2.apps.{app_name}.cli")
+                module = importlib.import_module(f"funmedia.apps.{app_name}.cli")
                 logger.info(_("应用：{0}").format(app_name))
                 command = getattr(module, app_name)
                 return command
@@ -217,7 +217,7 @@ def set_cli_config(ctx, **kwargs):
 
 async def run_app(kwargs):
     app_name = kwargs["app_name"]
-    app_module = importlib.import_module(f"f2.apps.{app_name}.handler")
+    app_module = importlib.import_module(f"funmedia.apps.{app_name}.handler")
     await app_module.main(kwargs)
 
 

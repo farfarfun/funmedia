@@ -10,3 +10,4 @@ for i in os.walk("/home/bingtao/workspace/hubs/funmedia/funmedia"):
         #
         open(path, "w").write(text.replace("from f2", "from funmedia"))
         open(path, "w").write(text.replace("import f2", "import funmedia"))
+        open(path, "w").write(text.replace("f2.", "funmedia."))

@@ -27,7 +27,7 @@ class ClientConfManager:
     用于管理客户端配置 (Used to manage client configuration)
     """
 
-    client_conf = ConfigManager(f2.F2_CONFIG_FILE_PATH).get_config("f2")
+    client_conf = ConfigManager(funmedia.F2_CONFIG_FILE_PATH).get_config("f2")
     weibo_conf = client_conf.get("weibo", {})
 
     @classmethod

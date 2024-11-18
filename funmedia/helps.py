@@ -26,7 +26,7 @@ from funmedia.i18n.translator import _
 
 def get_help(app_name: str) -> None:
     try:
-        module = importlib.import_module(f"f2.apps.{app_name}.help")
+        module = importlib.import_module(f"funmedia.apps.{app_name}.help")
         if hasattr(module, "help"):
             module.help()
         else:
@@ -38,10 +38,10 @@ def get_help(app_name: str) -> None:
 def main() -> None:
     # 真彩
     console = Console(color_system="truecolor")
-    console.print(f"\n:rocket: [bold]f2 {f2.__version__} :rocket:", justify="center")
-    console.print(f"\n[i]{f2.__description_cn__}", justify="center")
-    console.print(f"[i]{f2.__description_en__}", justify="center")
-    console.print(f"[i]GitHub {f2.__repourl__}\n", justify="center")
+    console.print(f"\n:rocket: [bold]f2 {funmedia.__version__} :rocket:", justify="center")
+    console.print(f"\n[i]{funmedia.__description_cn__}", justify="center")
+    console.print(f"[i]{funmedia.__description_en__}", justify="center")
+    console.print(f"[i]GitHub {funmedia.__repourl__}\n", justify="center")
 
     # 使用方法
     table = Table.grid(padding=1, pad_edge=True)
