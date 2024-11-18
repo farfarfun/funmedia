@@ -473,7 +473,6 @@ class PostTweetFilter(JSONModel):
 
     @property
     def tweet_media_url(self):
-
         media_list = []
         # root = self._get_list_attr_value(
         #     "$.data.user.result.timeline_v2.timeline.instructions[-1].entries[*].content.itemContent.tweet_results.result.tweet.legacy.entities"
@@ -492,7 +491,6 @@ class PostTweetFilter(JSONModel):
 
     @property
     def tweet_video_url(self):
-
         # [*].video_info.variants
         # return [
         #     (
@@ -839,7 +837,6 @@ class PostRetweetFilter(JSONModel):
 
     @property
     def tweet_media_url(self):
-
         media_list = []
         root = self._get_list_attr_value(
             "$.data.user.result.timeline_v2.timeline.instructions[-1].entries[*].content.itemContent.tweet_results.result.legacy.entities"
@@ -866,7 +863,6 @@ class PostRetweetFilter(JSONModel):
 
     @property
     def tweet_video_url(self):
-
         video_list = []
         root = self._get_list_attr_value(
             "$.data.user.result.timeline_v2.timeline.instructions[-1].entries[*].content.itemContent.tweet_results.result.legacy.entities"
@@ -917,7 +913,6 @@ class PostRetweetFilter(JSONModel):
                     print("++++++++++++++++++++++++++++++++++")
                     video_list.append(None)
                 else:
-
                     video_dict_list = root[video_url_list.index(video_dict)][
                         "media"
                     ]  # list类型，其中的media可能[{0},{1},{2}]或者{0}

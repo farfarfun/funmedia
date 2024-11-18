@@ -3,6 +3,7 @@
 # source: douyin_webcast.proto
 # Protobuf Python Version: 4.25.1
 """Generated protocol buffer code."""
+
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import symbol_database as _symbol_database
@@ -39,9 +40,9 @@ if _descriptor._USE_C_DESCRIPTORS == False:
     _globals["_USER_FANSCLUB_PREFERDATAENTRY"]._options = None
     _globals["_USER_FANSCLUB_PREFERDATAENTRY"]._serialized_options = b"8\001"
     _globals["_USER_FANSCLUB_FANSCLUBDATA_USERBADGE_ICONSENTRY"]._options = None
-    _globals["_USER_FANSCLUB_FANSCLUBDATA_USERBADGE_ICONSENTRY"]._serialized_options = (
-        b"8\001"
-    )
+    _globals[
+        "_USER_FANSCLUB_FANSCLUBDATA_USERBADGE_ICONSENTRY"
+    ]._serialized_options = b"8\001"
     _globals["_COMMENTTYPETAG"]._serialized_start = 19244
     _globals["_COMMENTTYPETAG"]._serialized_end = 19311
     _globals["_RESPONSE"]._serialized_start = 33
@@ -196,9 +197,9 @@ if _descriptor._USE_C_DESCRIPTORS == False:
     _globals["_USER_FANSCLUB_FANSCLUBDATA"]._serialized_end = 16386
     _globals["_USER_FANSCLUB_FANSCLUBDATA_USERBADGE"]._serialized_start = 16227
     _globals["_USER_FANSCLUB_FANSCLUBDATA_USERBADGE"]._serialized_end = 16386
-    _globals["_USER_FANSCLUB_FANSCLUBDATA_USERBADGE_ICONSENTRY"]._serialized_start = (
-        16327
-    )
+    _globals[
+        "_USER_FANSCLUB_FANSCLUBDATA_USERBADGE_ICONSENTRY"
+    ]._serialized_start = 16327
     _globals["_USER_FANSCLUB_FANSCLUBDATA_USERBADGE_ICONSENTRY"]._serialized_end = 16386
     _globals["_USER_FANSGROUPINFO"]._serialized_start = 16388
     _globals["_USER_FANSGROUPINFO"]._serialized_end = 16403

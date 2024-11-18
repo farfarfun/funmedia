@@ -43,7 +43,9 @@ class AsyncUserDB(BaseDB):
         ]
 
         fields_sql = ", ".join(fields)
-        await self.execute(f"""CREATE TABLE IF NOT EXISTS {self.TABLE_NAME} ({fields_sql})""")
+        await self.execute(
+            f"""CREATE TABLE IF NOT EXISTS {self.TABLE_NAME} ({fields_sql})"""
+        )
         await self.commit()
 
     async def add_user_info(self, ignore_fields=None, **kwargs) -> None:
@@ -102,7 +104,9 @@ class AsyncUserDB(BaseDB):
         Returns:
             dict: 对应的用户信息，如果不存在则返回 None
         """
-        cursor = await self.execute(f"SELECT * FROM {self.TABLE_NAME} WHERE sec_user_id=?", (sec_user_id,))
+        cursor = await self.execute(
+            f"SELECT * FROM {self.TABLE_NAME} WHERE sec_user_id=?", (sec_user_id,)
+        )
         result = await cursor.fetchone()
         if not result:
             return {}
@@ -116,7 +120,9 @@ class AsyncUserDB(BaseDB):
         Args:
             sec_user_id (str): 用户唯一标识
         """
-        await self.execute(f"DELETE FROM {self.TABLE_NAME} WHERE sec_user_id=?", (sec_user_id,))
+        await self.execute(
+            f"DELETE FROM {self.TABLE_NAME} WHERE sec_user_id=?", (sec_user_id,)
+        )
         await self.commit()
 
     async def __aenter__(self):
@@ -215,7 +221,9 @@ class AsyncVideoDB(BaseDB):
         ]
 
         fields_sql = ", ".join(fields)
-        await self.execute(f"""CREATE TABLE IF NOT EXISTS {self.TABLE_NAME} ({fields_sql})""")
+        await self.execute(
+            f"""CREATE TABLE IF NOT EXISTS {self.TABLE_NAME} ({fields_sql})"""
+        )
         await self.commit()
 
     async def add_video_info(self, ignore_fields=None, **kwargs) -> None:
@@ -244,7 +252,9 @@ class AsyncVideoDB(BaseDB):
         )
         await self.commit()
 
-    async def batch_insert_videos(self, video_data_list: list, ignore_fields=None) -> None:
+    async def batch_insert_videos(
+        self, video_data_list: list, ignore_fields=None
+    ) -> None:
         """
         批量添加视频信息
 
@@ -283,7 +293,9 @@ class AsyncVideoDB(BaseDB):
         Returns:
             dict: 对应视频的信息
         """
-        cursor = await self.execute(f"SELECT * FROM {self.TABLE_NAME} WHERE aweme_id=?", (aweme_id,))
+        cursor = await self.execute(
+            f"SELECT * FROM {self.TABLE_NAME} WHERE aweme_id=?", (aweme_id,)
+        )
         result = await cursor.fetchone()
 
         if not result:
@@ -303,7 +315,9 @@ class AsyncVideoDB(BaseDB):
         set_sql = ", ".join([f"{key} = ?" for key in kwargs.keys()])
         values = tuple(kwargs.values()) + (aweme_id,)
 
-        await self.execute(f"UPDATE {self.TABLE_NAME} SET {set_sql} WHERE aweme_id=?", values)
+        await self.execute(
+            f"UPDATE {self.TABLE_NAME} SET {set_sql} WHERE aweme_id=?", values
+        )
         await self.commit()
 
     async def delete_video_info(self, aweme_id: str) -> None:
@@ -313,7 +327,9 @@ class AsyncVideoDB(BaseDB):
         Args:
             aweme_id (str): 视频ID
         """
-        await self.execute(f"DELETE FROM {self.TABLE_NAME} WHERE aweme_id=?", (aweme_id,))
+        await self.execute(
+            f"DELETE FROM {self.TABLE_NAME} WHERE aweme_id=?", (aweme_id,)
+        )
         await self.commit()
 
     async def __aenter__(self):

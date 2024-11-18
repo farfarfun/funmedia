@@ -223,7 +223,9 @@ class TokenManager(BaseCrawler):
         except httpx.TimeoutException as exc:
             logger.error(traceback.format_exc())
             raise APITimeoutError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(
                     _("请求端点超时"),
                     instance.token_conf["url"],
                     cls.proxies,
@@ -235,7 +237,9 @@ class TokenManager(BaseCrawler):
         except httpx.NetworkError as exc:
             logger.error(traceback.format_exc())
             raise APIConnectionError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(
                     _("网络连接失败，请检查当前网络环境"),
                     instance.token_conf["url"],
                     cls.proxies,
@@ -247,7 +251,9 @@ class TokenManager(BaseCrawler):
         except httpx.ProtocolError as exc:
             logger.error(traceback.format_exc())
             raise APIUnauthorizedError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(
                     _("请求协议错误"),
                     instance.token_conf["url"],
                     cls.proxies,
@@ -259,7 +265,9 @@ class TokenManager(BaseCrawler):
         except httpx.ProxyError as exc:
             logger.error(traceback.format_exc())
             raise APIConnectionError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(
                     _("请求代理错误"),
                     instance.token_conf["url"],
                     cls.proxies,
@@ -315,14 +323,18 @@ class TokenManager(BaseCrawler):
             ttwid = httpx.Cookies(response.cookies).get("ttwid")
 
             if ttwid is None:
-                raise APIResponseError(_("ttwid: 检查没有通过, 请更新配置文件中的 ttwid"))
+                raise APIResponseError(
+                    _("ttwid: 检查没有通过, 请更新配置文件中的 ttwid")
+                )
 
             return ttwid
 
         except httpx.TimeoutException as exc:
             logger.error(traceback.format_exc())
             raise APITimeoutError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(
                     _("请求端点超时"),
                     instance.ttwid_conf["url"],
                     cls.proxies,
@@ -334,7 +346,9 @@ class TokenManager(BaseCrawler):
         except httpx.NetworkError as exc:
             logger.error(traceback.format_exc())
             raise APIConnectionError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(
                     _("网络连接失败，请检查当前网络环境"),
                     instance.ttwid_conf["url"],
                     cls.proxies,
@@ -346,7 +360,9 @@ class TokenManager(BaseCrawler):
         except httpx.ProtocolError as exc:
             logger.error(traceback.format_exc())
             raise APIUnauthorizedError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(
                     _("请求协议错误"),
                     instance.ttwid_conf["url"],
                     cls.proxies,
@@ -358,7 +374,9 @@ class TokenManager(BaseCrawler):
         except httpx.ProxyError as exc:
             logger.error(traceback.format_exc())
             raise APIConnectionError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(
                     _("请求代理错误"),
                     instance.ttwid_conf["url"],
                     cls.proxies,
@@ -423,7 +441,9 @@ class TokenManager(BaseCrawler):
         except httpx.TimeoutException as exc:
             logger.error(traceback.format_exc())
             raise APITimeoutError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(
                     _("请求端点超时"),
                     instance.webid_conf["url"],
                     cls.proxies,
@@ -435,7 +455,9 @@ class TokenManager(BaseCrawler):
         except httpx.NetworkError as exc:
             logger.error(traceback.format_exc())
             raise APIConnectionError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(
                     _("网络连接失败，请检查当前网络环境"),
                     instance.webid_conf["url"],
                     cls.proxies,
@@ -447,7 +469,9 @@ class TokenManager(BaseCrawler):
         except httpx.ProtocolError as exc:
             logger.error(traceback.format_exc())
             raise APIUnauthorizedError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(
                     _("请求协议错误"),
                     instance.webid_conf["url"],
                     cls.proxies,
@@ -459,7 +483,9 @@ class TokenManager(BaseCrawler):
         except httpx.ProxyError as exc:
             logger.error(traceback.format_exc())
             raise APIConnectionError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(
                     _("请求代理错误"),
                     instance.webid_conf["url"],
                     cls.proxies,
@@ -592,7 +618,9 @@ class ABogusManager:
     ) -> str:
         try:
             browser_fp = BrowserFpGen.generate_fingerprint("Edge")
-            final_endpoint = AB(fp=browser_fp, user_agent=user_agent).generate_abogus(params, request_type)
+            final_endpoint = AB(fp=browser_fp, user_agent=user_agent).generate_abogus(
+                params, request_type
+            )
         except Exception as e:
             logger.error(traceback.format_exc())
             raise RuntimeError(_("生成A-Bogus失败: {0})").format(e))
@@ -614,7 +642,9 @@ class ABogusManager:
 
         try:
             browser_fp = BrowserFpGen.generate_fingerprint("Edge")
-            ab_value = AB(fp=browser_fp, user_agent=user_agent).generate_abogus(param_str, request_type)
+            ab_value = AB(fp=browser_fp, user_agent=user_agent).generate_abogus(
+                param_str, request_type
+            )
         except Exception as e:
             logger.error(traceback.format_exc())
             raise RuntimeError(_("生成A-Bogus失败: {0})").format(e))
@@ -697,7 +727,11 @@ class SecUserIdFetcher(BaseCrawler):
         # 创建一个实例以访问 aclient
         instance = cls()
 
-        pattern = cls._REDIRECT_URL_PATTERN if "v.douyin.com" in url else cls._DOUYIN_URL_PATTERN
+        pattern = (
+            cls._REDIRECT_URL_PATTERN
+            if "v.douyin.com" in url
+            else cls._DOUYIN_URL_PATTERN
+        )
 
         try:
             response = await instance.aclient.get(url, follow_redirects=True)
@@ -707,20 +741,24 @@ class SecUserIdFetcher(BaseCrawler):
                     return match.group(1)
                 else:
                     raise APIResponseError(
-                        _("未在响应的地址中找到sec_user_id，检查链接是否为用户主页类名：{0}").format(cls.__name__)
+                        _(
+                            "未在响应的地址中找到sec_user_id，检查链接是否为用户主页类名：{0}"
+                        ).format(cls.__name__)
                     )
             response.raise_for_status()
 
         except httpx.TimeoutException as exc:
             raise APITimeoutError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
-                    _("请求端点超时"), url, cls.proxies, cls.__name__, exc
-                )
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(_("请求端点超时"), url, cls.proxies, cls.__name__, exc)
             )
 
         except httpx.NetworkError as exc:
             raise APIConnectionError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(
                     _("网络连接失败，请检查当前网络环境"),
                     url,
                     cls.proxies,
@@ -731,16 +769,16 @@ class SecUserIdFetcher(BaseCrawler):
 
         except httpx.ProtocolError as exc:
             raise APIUnauthorizedError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
-                    _("请求协议错误"), url, cls.proxies, cls.__name__, exc
-                )
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(_("请求协议错误"), url, cls.proxies, cls.__name__, exc)
             )
 
         except httpx.ProxyError as exc:
             raise APIConnectionError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
-                    _("请求代理错误"), url, cls.proxies, cls.__name__, exc
-                )
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(_("请求代理错误"), url, cls.proxies, cls.__name__, exc)
             )
 
         except httpx.HTTPStatusError as exc:
@@ -773,7 +811,9 @@ class SecUserIdFetcher(BaseCrawler):
         urls = extract_valid_urls(urls)
 
         if urls == []:
-            raise APINotFoundError(_("输入的URL List不合法。类名：{0}").format(cls.__name__))
+            raise APINotFoundError(
+                _("输入的URL List不合法。类名：{0}").format(cls.__name__)
+            )
 
         sec_user_ids = [cls.get_sec_user_id(url) for url in urls]
         return await asyncio.gather(*sec_user_ids)
@@ -865,19 +905,23 @@ class AwemeIdFetcher(BaseCrawler):
                 if match:
                     aweme_id = match.group(1)
                 else:
-                    raise APIResponseError(_("未在响应的地址中找到aweme_id，检查链接是否为作品页"))
+                    raise APIResponseError(
+                        _("未在响应的地址中找到aweme_id，检查链接是否为作品页")
+                    )
             return aweme_id
 
         except httpx.TimeoutException as exc:
             raise APITimeoutError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
-                    _("请求端点超时"), url, cls.proxies, cls.__name__, exc
-                )
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(_("请求端点超时"), url, cls.proxies, cls.__name__, exc)
             )
 
         except httpx.NetworkError as exc:
             raise APIConnectionError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(
                     _("网络连接失败，请检查当前网络环境"),
                     url,
                     cls.proxies,
@@ -888,16 +932,16 @@ class AwemeIdFetcher(BaseCrawler):
 
         except httpx.ProtocolError as exc:
             raise APIUnauthorizedError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
-                    _("请求协议错误"), url, cls.proxies, cls.__name__, exc
-                )
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(_("请求协议错误"), url, cls.proxies, cls.__name__, exc)
             )
 
         except httpx.ProxyError as exc:
             raise APIConnectionError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
-                    _("请求代理错误"), url, cls.proxies, cls.__name__, exc
-                )
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(_("请求代理错误"), url, cls.proxies, cls.__name__, exc)
             )
 
         except httpx.HTTPStatusError as exc:
@@ -930,7 +974,9 @@ class AwemeIdFetcher(BaseCrawler):
         urls = extract_valid_urls(urls)
 
         if urls == []:
-            raise APINotFoundError(_("输入的URL List不合法。类名：{0}").format(cls.__name__))
+            raise APINotFoundError(
+                _("输入的URL List不合法。类名：{0}").format(cls.__name__)
+            )
 
         aweme_ids = [cls.get_aweme_id(url) for url in urls]
         return await asyncio.gather(*aweme_ids)
@@ -1013,19 +1059,23 @@ class MixIdFetcher(BaseCrawler):
             if match:
                 mix_id = match.group(1)
             else:
-                raise APIResponseError(_("未在响应的地址中找到mix_id，检查链接是否为合集页"))
+                raise APIResponseError(
+                    _("未在响应的地址中找到mix_id，检查链接是否为合集页")
+                )
             return mix_id
 
         except httpx.TimeoutException as exc:
             raise APITimeoutError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
-                    _("请求端点超时"), url, cls.proxies, cls.__name__, exc
-                )
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(_("请求端点超时"), url, cls.proxies, cls.__name__, exc)
             )
 
         except httpx.NetworkError as exc:
             raise APIConnectionError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(
                     _("网络连接失败，请检查当前网络环境"),
                     url,
                     cls.proxies,
@@ -1036,16 +1086,16 @@ class MixIdFetcher(BaseCrawler):
 
         except httpx.ProtocolError as exc:
             raise APIUnauthorizedError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
-                    _("请求协议错误"), url, cls.proxies, cls.__name__, exc
-                )
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(_("请求协议错误"), url, cls.proxies, cls.__name__, exc)
             )
 
         except httpx.ProxyError as exc:
             raise APIConnectionError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
-                    _("请求代理错误"), url, cls.proxies, cls.__name__, exc
-                )
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(_("请求代理错误"), url, cls.proxies, cls.__name__, exc)
             )
 
         except httpx.HTTPStatusError as exc:
@@ -1077,7 +1127,9 @@ class MixIdFetcher(BaseCrawler):
         urls = extract_valid_urls(urls)
 
         if urls == []:
-            raise APINotFoundError(_("输入的URL List不合法。类名：{0}").format(cls.__name__))
+            raise APINotFoundError(
+                _("输入的URL List不合法。类名：{0}").format(cls.__name__)
+            )
 
         mix_ids = [cls.get_mix_id(url) for url in urls]
         return await asyncio.gather(*mix_ids)
@@ -1169,20 +1221,28 @@ class WebCastIdFetcher(BaseCrawler):
                 match = live_pattern2.search(url)
             elif live_pattern3.search(url):
                 match = live_pattern3.search(url)
-                logger.warning(_("该链接返回的是room_id，请使用`fetch_user_live_videos_by_room_id`接口"))
+                logger.warning(
+                    _(
+                        "该链接返回的是room_id，请使用`fetch_user_live_videos_by_room_id`接口"
+                    )
+                )
             else:
-                raise APIResponseError(_("未在响应的地址中找到webcast_id，检查链接是否为直播页"))
+                raise APIResponseError(
+                    _("未在响应的地址中找到webcast_id，检查链接是否为直播页")
+                )
 
             return match.group(1)
         except httpx.TimeoutException as exc:
             raise APITimeoutError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
-                    _("请求端点超时"), url, cls.proxies, cls.__name__, exc
-                )
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(_("请求端点超时"), url, cls.proxies, cls.__name__, exc)
             )
         except httpx.NetworkError as exc:
             raise APIConnectionError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(
                     _("网络连接失败，请检查当前网络环境"),
                     url,
                     cls.proxies,
@@ -1192,16 +1252,16 @@ class WebCastIdFetcher(BaseCrawler):
             )
         except httpx.ProtocolError as exc:
             raise APIUnauthorizedError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
-                    _("请求协议错误"), url, cls.proxies, cls.__name__, exc
-                )
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(_("请求协议错误"), url, cls.proxies, cls.__name__, exc)
             )
 
         except httpx.ProxyError as exc:
             raise APIConnectionError(
-                _("{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}").format(
-                    _("请求代理错误"), url, cls.proxies, cls.__name__, exc
-                )
+                _(
+                    "{0}。 链接：{1}，代理：{2}，异常类名：{3}，异常详细信息：{4}"
+                ).format(_("请求代理错误"), url, cls.proxies, cls.__name__, exc)
             )
 
         except httpx.HTTPStatusError as exc:
@@ -1234,7 +1294,9 @@ class WebCastIdFetcher(BaseCrawler):
         urls = extract_valid_urls(urls)
 
         if urls == []:
-            raise APINotFoundError(_("输入的URL List不合法。类名：{0}").format(cls.__name__))
+            raise APINotFoundError(
+                _("输入的URL List不合法。类名：{0}").format(cls.__name__)
+            )
 
         webcast_ids = [cls.get_webcast_id(url) for url in urls]
         return await asyncio.gather(*webcast_ids)
@@ -1322,7 +1384,9 @@ def create_user_folder(kwargs: dict, nickname: Union[str, int]) -> Path:
     base_path = Path(kwargs.get("path", "Download"))
 
     # 添加下载模式和用户名
-    user_path = base_path / "douyin" / kwargs.get("mode", "PLEASE_SETUP_MODE") / str(nickname)
+    user_path = (
+        base_path / "douyin" / kwargs.get("mode", "PLEASE_SETUP_MODE") / str(nickname)
+    )
 
     # 获取绝对路径并确保它存在
     resolve_user_path = user_path.resolve()
@@ -1353,7 +1417,9 @@ def rename_user_folder(old_path: Path, new_nickname: str) -> Path:
     return new_path
 
 
-def create_or_rename_user_folder(kwargs: dict, local_user_data: dict, current_nickname: str) -> Path:
+def create_or_rename_user_folder(
+    kwargs: dict, local_user_data: dict, current_nickname: str
+) -> Path:
     """
     创建或重命名用户目录 (Create or rename user directory)
 

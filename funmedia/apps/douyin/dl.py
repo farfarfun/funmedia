@@ -14,7 +14,11 @@ from .utils import format_file_name, json_2_lrc
 class DouyinDownloader(BaseDownloader):
     def __init__(self, kwargs: dict = {}):
         if kwargs["cookie"] is None:
-            raise ValueError(_("cookie不能为空。请提供有效的 cookie 参数，或自动从浏览器获取。如 `--auto-cookie edge`"))
+            raise ValueError(
+                _(
+                    "cookie不能为空。请提供有效的 cookie 参数，或自动从浏览器获取。如 `--auto-cookie edge`"
+                )
+            )
 
         super().__init__(kwargs)
 
@@ -74,19 +78,25 @@ class DouyinDownloader(BaseDownloader):
                 )
                 return aweme_datas
             else:
-                logger.warning(_("作品发布时间不在指定区间内：{0}").format(aweme_date_str))
+                logger.warning(
+                    _("作品发布时间不在指定区间内：{0}").format(aweme_date_str)
+                )
                 return None
 
         elif isinstance(aweme_datas, list):
             # 遍历列表中的每个字典
             filtered_list = []
             for aweme_data in aweme_datas:
-                filtered_data = await self.filter_aweme_datas_by_interval(aweme_data, interval)
+                filtered_data = await self.filter_aweme_datas_by_interval(
+                    aweme_data, interval
+                )
                 if filtered_data:
                     filtered_list.append(filtered_data)
             return filtered_list
 
-    async def create_download_tasks(self, kwargs: dict, aweme_datas: Union[list, dict], user_path: Any) -> None:
+    async def create_download_tasks(
+        self, kwargs: dict, aweme_datas: Union[list, dict], user_path: Any
+    ) -> None:
         """
         创建下载任务
 
@@ -96,15 +106,24 @@ class DouyinDownloader(BaseDownloader):
             user_path (str): 用户目录路径
         """
 
-        if not kwargs or not aweme_datas or not isinstance(aweme_datas, (list, dict)) or not user_path:
+        if (
+            not kwargs
+            or not aweme_datas
+            or not isinstance(aweme_datas, (list, dict))
+            or not user_path
+        ):
             return
 
         # 统一处理，将 aweme_datas 转为列表
-        aweme_datas_list = [aweme_datas] if isinstance(aweme_datas, dict) else aweme_datas
+        aweme_datas_list = (
+            [aweme_datas] if isinstance(aweme_datas, dict) else aweme_datas
+        )
 
         # 筛选指定日期区间内的作品
         if kwargs.get("interval") != "all":
-            aweme_datas_list = await self.filter_aweme_datas_by_interval(aweme_datas_list, kwargs.get("interval"))
+            aweme_datas_list = await self.filter_aweme_datas_by_interval(
+                aweme_datas_list, kwargs.get("interval")
+            )
 
         # 检查是否有符合条件的作品
         if not aweme_datas_list:
@@ -119,7 +138,9 @@ class DouyinDownloader(BaseDownloader):
         # 执行下载任务
         await self.execute_tasks()
 
-    async def handler_download(self, kwargs: dict, aweme_data_dict: dict, user_path: Any) -> None:
+    async def handler_download(
+        self, kwargs: dict, aweme_data_dict: dict, user_path: Any
+    ) -> None:
         """
         处理下载任务
 
@@ -131,7 +152,8 @@ class DouyinDownloader(BaseDownloader):
 
         # 构建文件夹路径
         base_path = (
-            user_path / format_file_name(kwargs.get("naming", "{create}_{desc}"), aweme_data_dict)
+            user_path
+            / format_file_name(kwargs.get("naming", "{create}_{desc}"), aweme_data_dict)
             if kwargs.get("folderize")
             else user_path
         )
@@ -139,8 +161,12 @@ class DouyinDownloader(BaseDownloader):
         sec_user_id = str(aweme_data_dict.get("sec_user_id"))  # 用户ID
         aweme_prohibited = aweme_data_dict.get("is_prohibited")  # 作品状态 0正常, 1屏蔽
         # aweme_part_see = aweme_data_dict.get("part_see")  # 部分可见 part_see 1, private_status 1
-        aweme_status = aweme_data_dict.get("private_status")  # 视频权限 0公开或不给谁看, 1私密, 2互关朋友
-        aweme_type = aweme_data_dict.get("aweme_type")  # 视频类型 0视频, 55动图或关闭下载, 61挑战， 109日常, 68图集
+        aweme_status = aweme_data_dict.get(
+            "private_status"
+        )  # 视频权限 0公开或不给谁看, 1私密, 2互关朋友
+        aweme_type = aweme_data_dict.get(
+            "aweme_type"
+        )  # 视频类型 0视频, 55动图或关闭下载, 61挑战， 109日常, 68图集
         aweme_id = str(aweme_data_dict.get("aweme_id"))  # 视频ID
 
         logger.debug(f"========{aweme_id}========")
@@ -157,55 +183,93 @@ class DouyinDownloader(BaseDownloader):
             # 处理音乐下载任务
             if kwargs.get("music"):
                 if aweme_data_dict.get("music_status") == 1:  # 原声状态 1 正常 0 失效
-                    music_name = format_file_name(kwargs.get("naming", "{create}_{desc}"), aweme_data_dict) + "_music"
+                    music_name = (
+                        format_file_name(
+                            kwargs.get("naming", "{create}_{desc}"), aweme_data_dict
+                        )
+                        + "_music"
+                    )
 
                     music_url = aweme_data_dict.get("music_play_url")
                     if music_url is not None:
-                        await self.initiate_download(_("原声"), music_url, base_path, music_name, ".mp3")
+                        await self.initiate_download(
+                            _("原声"), music_url, base_path, music_name, ".mp3"
+                        )
                 else:
                     logger.warning(_("{0} 该原声已被屏蔽，无法下载").format(aweme_id))
 
             # 处理封面下载任务
             if kwargs.get("cover"):
-                cover_name = format_file_name(kwargs.get("naming", "{create}_{desc}"), aweme_data_dict) + "_cover"
+                cover_name = (
+                    format_file_name(
+                        kwargs.get("naming", "{create}_{desc}"), aweme_data_dict
+                    )
+                    + "_cover"
+                )
                 animated_cover_url = aweme_data_dict.get("animated_cover")
                 cover_url = aweme_data_dict.get("cover")
                 if animated_cover_url is not None:
-                    await self.initiate_download(_("封面"), animated_cover_url, base_path, cover_name, ".webp")
+                    await self.initiate_download(
+                        _("封面"), animated_cover_url, base_path, cover_name, ".webp"
+                    )
                 elif cover_url is not None:
                     logger.warning(_("{0} 该作品没有动态封面").format(aweme_id))
-                    await self.initiate_download(_("封面"), cover_url, base_path, cover_name, ".jpeg")
+                    await self.initiate_download(
+                        _("封面"), cover_url, base_path, cover_name, ".jpeg"
+                    )
                 else:
                     logger.warning(_("{0} 该作品没有封面").format(aweme_id))
 
             # 处理文案下载任务
             if kwargs.get("desc"):
-                desc_name = format_file_name(kwargs.get("naming", "{create}_{desc}"), aweme_data_dict) + "_desc"
+                desc_name = (
+                    format_file_name(
+                        kwargs.get("naming", "{create}_{desc}"), aweme_data_dict
+                    )
+                    + "_desc"
+                )
                 desc_content = aweme_data_dict.get("desc")
-                await self.initiate_static_download(_("文案"), desc_content, base_path, desc_name, ".txt")
+                await self.initiate_static_download(
+                    _("文案"), desc_content, base_path, desc_name, ".txt"
+                )
 
             # 处理不同类型的作品下载任务
             if aweme_type in [0, 55, 61, 109, 201]:
-                video_name = format_file_name(kwargs.get("naming", "{create}_{desc}"), aweme_data_dict) + "_video"
+                video_name = (
+                    format_file_name(
+                        kwargs.get("naming", "{create}_{desc}"), aweme_data_dict
+                    )
+                    + "_video"
+                )
                 # video_play_addr 现在为一个list，第一个链接下载失败，则下载第二个链接
                 video_url = aweme_data_dict.get("video_play_addr")
                 if video_url is not None:
-                    await self.initiate_download(_("视频"), video_url, base_path, video_name, ".mp4")
+                    await self.initiate_download(
+                        _("视频"), video_url, base_path, video_name, ".mp4"
+                    )
                 else:
-                    logger.warning(_("{0} 该作品没有视频链接，无法下载").format(aweme_id))
+                    logger.warning(
+                        _("{0} 该作品没有视频链接，无法下载").format(aweme_id)
+                    )
 
             elif aweme_type in [68]:
                 for i, image_url in enumerate(aweme_data_dict.get("images", None)):
                     image_name = f"{format_file_name(kwargs.get('naming'), aweme_data_dict)}_image_{i + 1}"
                     if image_url is not None:
-                        await self.initiate_download(_("图集"), image_url, base_path, image_name, ".jpg")
+                        await self.initiate_download(
+                            _("图集"), image_url, base_path, image_name, ".jpg"
+                        )
                     else:
-                        logger.warning(_("{0} 该图集没有图片链接，无法下载").format(aweme_id))
+                        logger.warning(
+                            _("{0} 该图集没有图片链接，无法下载").format(aweme_id)
+                        )
 
         # 保存最后一个aweme_id
         await self.save_last_aweme_id(sec_user_id, aweme_id)
 
-    async def create_music_download_tasks(self, kwargs: dict, music_datas: Union[list, dict], user_path: Any) -> None:
+    async def create_music_download_tasks(
+        self, kwargs: dict, music_datas: Union[list, dict], user_path: Any
+    ) -> None:
         """
         创建音乐下载任务
 
@@ -215,7 +279,12 @@ class DouyinDownloader(BaseDownloader):
             user_path (Any): 用户目录路径
         """
 
-        if not kwargs or not music_datas or not isinstance(music_datas, (list, dict)) or not user_path:
+        if (
+            not kwargs
+            or not music_datas
+            or not isinstance(music_datas, (list, dict))
+            or not user_path
+        ):
             return
 
         if isinstance(music_datas, dict):
@@ -227,7 +296,9 @@ class DouyinDownloader(BaseDownloader):
         # 执行下载任务
         await self.execute_tasks()
 
-    async def handler_music_download(self, kwargs: dict, music_data_dict: dict, user_path: Any) -> None:
+    async def handler_music_download(
+        self, kwargs: dict, music_data_dict: dict, user_path: Any
+    ) -> None:
         """
         处理音乐下载任务
 
@@ -238,14 +309,20 @@ class DouyinDownloader(BaseDownloader):
         """
 
         # 构建文件夹路径
-        base_path = user_path / music_data_dict.get("title") if kwargs.get("folderize") else user_path
+        base_path = (
+            user_path / music_data_dict.get("title")
+            if kwargs.get("folderize")
+            else user_path
+        )
         music_name = music_data_dict.get("title") + "_music"
         music_url = music_data_dict.get("play_url")
         lyric_name = music_data_dict.get("title") + "_lyric"
         lyric_url = music_data_dict.get("lyric_url")
 
         if music_url is not None:
-            await self.initiate_download(_("音乐"), music_url, base_path, music_name, ".mp3")
+            await self.initiate_download(
+                _("音乐"), music_url, base_path, music_name, ".mp3"
+            )
 
         if kwargs.get("lyric"):
             if lyric_url is None:
@@ -259,9 +336,13 @@ class DouyinDownloader(BaseDownloader):
                 return
 
             lrc_content = json_2_lrc(lyric.json())
-            await self.initiate_static_download(_("歌词"), lrc_content, base_path, lyric_name, ".lrc")
+            await self.initiate_static_download(
+                _("歌词"), lrc_content, base_path, lyric_name, ".lrc"
+            )
 
-    async def create_stream_tasks(self, kwargs: dict, webcast_datas: Union[list, dict], user_path: Any) -> None:
+    async def create_stream_tasks(
+        self, kwargs: dict, webcast_datas: Union[list, dict], user_path: Any
+    ) -> None:
         """
         创建视频流下载任务
 
@@ -271,7 +352,12 @@ class DouyinDownloader(BaseDownloader):
             user_path (Any): 用户目录路径
         """
 
-        if not kwargs or not webcast_datas or not isinstance(webcast_datas, (list, dict)) or not user_path:
+        if (
+            not kwargs
+            or not webcast_datas
+            or not isinstance(webcast_datas, (list, dict))
+            or not user_path
+        ):
             return
 
         if isinstance(webcast_datas, dict):
@@ -283,7 +369,9 @@ class DouyinDownloader(BaseDownloader):
         # 执行下载任务
         await self.execute_tasks()
 
-    async def handler_stream(self, kwargs: dict, webcast_data_dict: dict, user_path: Any) -> None:
+    async def handler_stream(
+        self, kwargs: dict, webcast_data_dict: dict, user_path: Any
+    ) -> None:
         """
         处理视频流下载任务
 
@@ -301,7 +389,10 @@ class DouyinDownloader(BaseDownloader):
         }
         # 构建文件夹路径
         base_path = (
-            user_path / format_file_name(kwargs.get("naming", "{create}_{desc}"), custom_fields=custom_fields)
+            user_path
+            / format_file_name(
+                kwargs.get("naming", "{create}_{desc}"), custom_fields=custom_fields
+            )
             if kwargs.get("folderize")
             else user_path
         )
@@ -309,4 +400,6 @@ class DouyinDownloader(BaseDownloader):
         webcast_name = f"{format_file_name(kwargs.get('naming'), custom_fields=custom_fields)}_live"
         webcast_url = webcast_data_dict.get("m3u8_pull_url").get("FULL_HD1")
 
-        await self.initiate_m3u8_download(_("直播"), webcast_url, base_path, webcast_name, ".flv")
+        await self.initiate_m3u8_download(
+            _("直播"), webcast_url, base_path, webcast_name, ".flv"
+        )

@@ -10,7 +10,11 @@ from funmedia.apps.weibo.db import AsyncUserDB
 from funmedia.apps.weibo.crawler import WeiboCrawler
 from funmedia.apps.weibo.dl import WeiboDownloader
 from funmedia.apps.weibo.model import UserInfo, UserDetail, UserWeibo, WeiboDetail
-from funmedia.apps.weibo.filter import UserInfoFilter, UserDetailFilter, WeiboDetailFilter
+from funmedia.apps.weibo.filter import (
+    UserInfoFilter,
+    UserDetailFilter,
+    WeiboDetailFilter,
+)
 from funmedia.apps.weibo.utils import (
     WeiboIdFetcher,
     WeiboUidFetcher,
@@ -24,7 +28,6 @@ rich_prompt = RichConsoleManager().rich_prompt
 
 
 class WeiboHandler:
-
     # 需要忽略的字段
     user_ignore_fields = ["status"]
 

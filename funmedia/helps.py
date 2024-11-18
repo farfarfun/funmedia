@@ -38,7 +38,9 @@ def get_help(app_name: str) -> None:
 def main() -> None:
     # 真彩
     console = Console(color_system="truecolor")
-    console.print(f"\n:rocket: [bold]f2 {funmedia.__version__} :rocket:", justify="center")
+    console.print(
+        f"\n:rocket: [bold]f2 {funmedia.__version__} :rocket:", justify="center"
+    )
     console.print(f"\n[i]{funmedia.__description_cn__}", justify="center")
     console.print(f"[i]{funmedia.__description_en__}", justify="center")
     console.print(f"[i]GitHub {funmedia.__repourl__}\n", justify="center")
@@ -92,9 +94,11 @@ def main() -> None:
         ),
         _("⚠"),
     )
-    table.add_row(
-        "Issues❓", "[link=https://github.com/Johnserf-Seed/f2/issues]Click Here[/]"
-    ),
+    (
+        table.add_row(
+            "Issues❓", "[link=https://github.com/Johnserf-Seed/f2/issues]Click Here[/]"
+        ),
+    )
     table.add_row(
         "Document📕", "[link=https://johnserf-seed.github.io/f2/]Click Here[/]"
     )

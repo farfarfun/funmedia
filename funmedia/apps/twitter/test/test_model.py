@@ -1,7 +1,6 @@
 from funmedia.apps.twitter.model import encode_model, TweetDetail, TweetDetailEncode
 
 if __name__ == "__main__":
-
     # tweet_detail_encode = quote(
     #     TweetDetailEncode(focalTweetId="1777291676568166526").model_dump_json()
     # )

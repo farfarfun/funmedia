@@ -7,7 +7,6 @@ from funmedia.utils.utils import _get_first_item_from_list, timestamp_2_str, rep
 
 
 class UserInfoFilter(JSONModel):
-
     @property
     def status(self):
         return self._get_attr_value("$.data.ok")
@@ -104,7 +103,6 @@ class UserInfoFilter(JSONModel):
 
 
 class UserDetailFilter(JSONModel):
-
     @property
     def status(self):
         return self._get_attr_value("$.ok")
@@ -161,7 +159,6 @@ class UserDetailFilter(JSONModel):
 
 
 class WeiboDetailFilter(JSONModel):
-
     @property
     def status(self):
         return self._get_attr_value("$.ok")
@@ -300,7 +297,6 @@ class WeiboDetailFilter(JSONModel):
 
 
 class UserWeiboFilter(JSONModel):
-
     @property
     def status(self):
         return self._get_attr_value("$.ok")

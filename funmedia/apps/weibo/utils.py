@@ -60,7 +60,6 @@ class ClientConfManager:
 
 
 class ModelManager:
-
     @classmethod
     def model_2_endpoint(cls, base_endpoint: str, params: dict = ...) -> str:
         if not params:

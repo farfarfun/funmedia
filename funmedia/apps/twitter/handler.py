@@ -35,7 +35,6 @@ rich_prompt = RichConsoleManager().rich_prompt
 
 
 class TwitterHandler:
-
     def __init__(self, kwargs: dict = ...) -> None:
         self.kwargs = kwargs
         self.downloader = TwitterDownloader(kwargs)

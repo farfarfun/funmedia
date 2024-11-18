@@ -93,7 +93,6 @@ class WeiboDownloader(BaseDownloader):
 
         # 检查微博是否有图片
         if weibo_data_dict.get("pic_num") == 0:
-
             # 说明是视频微博
             # print(weibo_data_dict.get("playback_list"))
             logger.info(

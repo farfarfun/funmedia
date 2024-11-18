@@ -62,7 +62,6 @@ class ClientConfManager:
 
 
 class ModelManager:
-
     @classmethod
     def model_2_endpoint(
         cls,

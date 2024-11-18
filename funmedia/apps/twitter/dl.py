@@ -106,7 +106,6 @@ class TwitterDownloader(BaseDownloader):
 
         # 检查推文是否有图片
         if tweet_media_type == "video":
-
             # 说明是视频推文
             # logger.info(
             #     _("推文视频时长：{0}s，码率列表：{1}").format(

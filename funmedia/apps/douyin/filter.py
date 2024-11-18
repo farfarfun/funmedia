@@ -133,7 +133,9 @@ class UserPostFilter(JSONModel):
 
     @property
     def has_aweme(self) -> bool:
-        return bool(self._get_attr_value("$.aweme_list"))  # 如果aweme_list是空的或None，此属性返回False
+        return bool(
+            self._get_attr_value("$.aweme_list")
+        )  # 如果aweme_list是空的或None，此属性返回False
 
     @property
     def locate_item_cursor(self):
@@ -183,7 +185,9 @@ class UserPostFilter(JSONModel):
 
     @property
     def author_avatar_thumb(self):
-        return self._get_list_attr_value("$.aweme_list[*].author.avatar_thumb.url_list[0]")
+        return self._get_list_attr_value(
+            "$.aweme_list[*].author.avatar_thumb.url_list[0]"
+        )
 
     @property
     def images(self):
@@ -212,7 +216,11 @@ class UserPostFilter(JSONModel):
 
         # 逐个视频判断是否存在animated_cover
         animated_covers = [
-            (video.get("animated_cover", {}).get("url_list", [None])[0] if video.get("animated_cover") else None)
+            (
+                video.get("animated_cover", {}).get("url_list", [None])[0]
+                if video.get("animated_cover")
+                else None
+            )
             for video in videos
         ]
 
@@ -220,7 +228,9 @@ class UserPostFilter(JSONModel):
 
     @property
     def cover(self):
-        return self._get_list_attr_value("$.aweme_list[*].video.origin_cover.url_list[0]")
+        return self._get_list_attr_value(
+            "$.aweme_list[*].video.origin_cover.url_list[0]"
+        )
 
     @property
     def video_play_addr(self):
@@ -319,7 +329,9 @@ class UserPostFilter(JSONModel):
         keys = [
             prop_name
             for prop_name in dir(self)
-            if not prop_name.startswith("__") and not prop_name.startswith("_") and prop_name not in exclude_list
+            if not prop_name.startswith("__")
+            and not prop_name.startswith("_")
+            and prop_name not in exclude_list
         ]
 
         aweme_entries = self._get_attr_value("$.aweme_list") or []
@@ -372,7 +384,9 @@ class UserCollectsFilter(JSONModel):
 
     @property
     def collects_cover(self):
-        return self._get_list_attr_value("$.collects_list[*].collects_cover.url_list[0]")
+        return self._get_list_attr_value(
+            "$.collects_list[*].collects_cover.url_list[0]"
+        )
 
     @property
     def collects_id(self):
@@ -447,7 +461,9 @@ class UserCollectsFilter(JSONModel):
     # user_info
     @property
     def nickname(self):
-        return replaceT(self._get_list_attr_value("$.collects_list[*].user_info.nickname"))
+        return replaceT(
+            self._get_list_attr_value("$.collects_list[*].user_info.nickname")
+        )
 
     @property
     def nickname_raw(self):
@@ -598,7 +614,9 @@ class UserMusicCollectionFilter(JSONModel):
         keys = [
             prop_name
             for prop_name in dir(self)
-            if not prop_name.startswith("__") and not prop_name.startswith("_") and prop_name not in exclude_list
+            if not prop_name.startswith("__")
+            and not prop_name.startswith("_")
+            and prop_name not in exclude_list
         ]
 
         aweme_entries = self._get_attr_value("$.mc_list") or []
@@ -689,7 +707,9 @@ class UserFollowingFilter(JSONModel):
 
     @property
     def can_show_comment(self):
-        return self._get_list_attr_value("$.followings[*].aweme_control.can_show_comment")
+        return self._get_list_attr_value(
+            "$.followings[*].aweme_control.can_show_comment"
+        )
 
     @property
     def aweme_count(self):
@@ -833,7 +853,9 @@ class UserFollowingFilter(JSONModel):
         keys = [
             prop_name
             for prop_name in dir(self)
-            if not prop_name.startswith("__") and not prop_name.startswith("_") and prop_name not in exclude_list
+            if not prop_name.startswith("__")
+            and not prop_name.startswith("_")
+            and prop_name not in exclude_list
         ]
 
         following_entries = self._get_attr_value("$.followings") or []
@@ -880,11 +902,15 @@ class UserFollowerFilter(UserFollowingFilter):
 
     @property
     def can_share(self):
-        return self._get_list_attr_value("$.followersfollowers[*].aweme_control.can_share")
+        return self._get_list_attr_value(
+            "$.followersfollowers[*].aweme_control.can_share"
+        )
 
     @property
     def can_show_comment(self):
-        return self._get_list_attr_value("$.followers[*].aweme_control.can_show_comment")
+        return self._get_list_attr_value(
+            "$.followers[*].aweme_control.can_show_comment"
+        )
 
     @property
     def aweme_count(self):
@@ -997,7 +1023,9 @@ class UserFollowerFilter(UserFollowingFilter):
         keys = [
             prop_name
             for prop_name in dir(self)
-            if not prop_name.startswith("__") and not prop_name.startswith("_") and prop_name not in exclude_list
+            if not prop_name.startswith("__")
+            and not prop_name.startswith("_")
+            and prop_name not in exclude_list
         ]
 
         following_entries = self._get_attr_value("$.followers") or []
@@ -1146,7 +1174,9 @@ class PostDetailFilter(JSONModel):
 
     @property
     def mix_create_time(self):
-        return timestamp_2_str(str(self._get_attr_value("$.aweme_detail.mix_info.mix_create_time")))
+        return timestamp_2_str(
+            str(self._get_attr_value("$.aweme_detail.mix_info.mix_create_time"))
+        )
 
     @property
     def mix_id(self):
@@ -1170,7 +1200,9 @@ class PostDetailFilter(JSONModel):
 
     @property
     def mix_update_time(self):
-        return timestamp_2_str(str(self._get_attr_value("$.aweme_detail.mix_info.mix_update_time")))
+        return timestamp_2_str(
+            str(self._get_attr_value("$.aweme_detail.mix_info.mix_update_time"))
+        )
 
     # music
     @property
@@ -1215,7 +1247,9 @@ class PostDetailFilter(JSONModel):
 
     @property
     def pgc_author(self):
-        return replaceT(self._get_attr_value("$.aweme_detail.music.matched_pgc_sound.pgc_author"))
+        return replaceT(
+            self._get_attr_value("$.aweme_detail.music.matched_pgc_sound.pgc_author")
+        )
 
     @property
     def pgc_author_raw(self):
@@ -1223,15 +1257,23 @@ class PostDetailFilter(JSONModel):
 
     @property
     def pgc_author_title(self):
-        return replaceT(self._get_attr_value("$.aweme_detail.music.matched_pgc_sound.pgc_author_title"))
+        return replaceT(
+            self._get_attr_value(
+                "$.aweme_detail.music.matched_pgc_sound.pgc_author_title"
+            )
+        )
 
     @property
     def pgc_author_title_raw(self):
-        return self._get_attr_value("$.aweme_detail.music.matched_pgc_sound.pgc_author_title")
+        return self._get_attr_value(
+            "$.aweme_detail.music.matched_pgc_sound.pgc_author_title"
+        )
 
     @property
     def pgc_music_type(self):
-        return self._get_attr_value("$.aweme_detail.music.matched_pgc_sound.pgc_music_type")
+        return self._get_attr_value(
+            "$.aweme_detail.music.matched_pgc_sound.pgc_music_type"
+        )
 
     @property
     def music_status(self):
@@ -1317,11 +1359,15 @@ class PostDetailFilter(JSONModel):
     # text_extra
     @property
     def hashtag_ids(self):
-        return self._get_list_attr_value("$.aweme_detail.text_extra[*].hashtag_id", True)
+        return self._get_list_attr_value(
+            "$.aweme_detail.text_extra[*].hashtag_id", True
+        )
 
     @property
     def hashtag_names(self):
-        return self._get_list_attr_value("$.aweme_detail.text_extra[*].hashtag_name", True)
+        return self._get_list_attr_value(
+            "$.aweme_detail.text_extra[*].hashtag_name", True
+        )
 
     # video
     @property
@@ -1444,7 +1490,9 @@ class UserLiveFilter(JSONModel):
     # partition
     @property
     def partition_id(self):
-        return self._get_attr_value("$.data.data[0].partition_road_map.partition.id_str")
+        return self._get_attr_value(
+            "$.data.data[0].partition_road_map.partition.id_str"
+        )
 
     @property
     def partition_title(self):
@@ -1452,11 +1500,15 @@ class UserLiveFilter(JSONModel):
 
     @property
     def sub_partition_id(self):
-        return self._get_attr_value("$.data.data[0].partition_road_map.sub_partition.id_str")
+        return self._get_attr_value(
+            "$.data.data[0].partition_road_map.sub_partition.id_str"
+        )
 
     @property
     def sub_partition_title(self):
-        return self._get_attr_value("$.data.data[0].partition_road_map.sub_partition.title")
+        return self._get_attr_value(
+            "$.data.data[0].partition_road_map.sub_partition.title"
+        )
 
     # room_auth
     @property
@@ -1654,7 +1706,9 @@ class FriendFeedFilter(JSONModel):
     # user
     @property
     def avatar_larger(self):
-        return self._get_list_attr_value("$.data[*].aweme.author.avatar_larger.url_list[0]")
+        return self._get_list_attr_value(
+            "$.data[*].aweme.author.avatar_larger.url_list[0]"
+        )
 
     @property
     def nickname(self):
@@ -1691,7 +1745,9 @@ class FriendFeedFilter(JSONModel):
 
     @property
     def recommend_reason(self):
-        return self._get_list_attr_value("$.data[*].aweme.fall_card_struct.recommend_reason")
+        return self._get_list_attr_value(
+            "$.data[*].aweme.fall_card_struct.recommend_reason"
+        )
 
     @property
     def create_time(self):
@@ -1762,7 +1818,11 @@ class FriendFeedFilter(JSONModel):
 
         # 逐个视频判断是否存在animated_cover
         animated_covers = [
-            (video.get("animated_cover", {}).get("url_list", [None])[0] if video.get("animated_cover") else None)
+            (
+                video.get("animated_cover", {}).get("url_list", [None])[0]
+                if video.get("animated_cover")
+                else None
+            )
             for video in videos
         ]
 
@@ -1811,7 +1871,9 @@ class FriendFeedFilter(JSONModel):
 
     @property
     def music_owner_nickname(self):
-        return replaceT(self._get_list_attr_value("$.data[*].aweme.music.owner_nickname"))
+        return replaceT(
+            self._get_list_attr_value("$.data[*].aweme.music.owner_nickname")
+        )
 
     @property
     def music_owner_nickname_raw(self):
@@ -1853,7 +1915,9 @@ class FriendFeedFilter(JSONModel):
         keys = [
             prop_name
             for prop_name in dir(self)
-            if not prop_name.startswith("__") and not prop_name.startswith("_") and prop_name not in exclude_list
+            if not prop_name.startswith("__")
+            and not prop_name.startswith("_")
+            and prop_name not in exclude_list
         ]
 
         friend_feed_entries = self._get_attr_value("$.data") or []
@@ -2151,7 +2215,9 @@ class FollowingUserLiveFilter(JSONModel):
     # user
     @property
     def avatar_thumb(self):
-        return self._get_list_attr_value("$.data.data.[*].room.owner.avatar_thumb.url_list[0]")
+        return self._get_list_attr_value(
+            "$.data.data.[*].room.owner.avatar_thumb.url_list[0]"
+        )
 
     @property
     def user_id(self):
@@ -2163,7 +2229,9 @@ class FollowingUserLiveFilter(JSONModel):
 
     @property
     def nickname(self):
-        return replaceT(self._get_list_attr_value("$.data.data.[*].room.owner.nickname"))
+        return replaceT(
+            self._get_list_attr_value("$.data.data.[*].room.owner.nickname")
+        )
 
     @property
     def nickname_raw(self):
@@ -2176,11 +2244,15 @@ class FollowingUserLiveFilter(JSONModel):
 
     @property
     def hls_pull_url(self):
-        return self._get_list_attr_value("$.data.data.[*].room.stream_url.hls_pull_url_map")
+        return self._get_list_attr_value(
+            "$.data.data.[*].room.stream_url.hls_pull_url_map"
+        )
 
     @property
     def stream_orientation(self):
-        return self._get_list_attr_value("$.data.data.[*].room.stream_url.stream_orientation")
+        return self._get_list_attr_value(
+            "$.data.data.[*].room.stream_url.stream_orientation"
+        )
 
     def _to_raw(self) -> dict:
         return self._data
@@ -2201,7 +2273,9 @@ class FollowingUserLiveFilter(JSONModel):
         keys = [
             prop_name
             for prop_name in dir(self)
-            if not prop_name.startswith("__") and not prop_name.startswith("_") and prop_name not in exclude_list
+            if not prop_name.startswith("__")
+            and not prop_name.startswith("_")
+            and prop_name not in exclude_list
         ]
 
         friend_feed_entries = self._get_attr_value("$.data.data") or []
