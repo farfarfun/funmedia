@@ -1,28 +1,22 @@
-# path: f2/apps/douyin/cli.py
-
-import funmedia
-import click
 import typing
-
-# import asyncio
-
 from pathlib import Path
 
+import click
+import funmedia
 from funmedia import helps
 from funmedia.cli.cli_commands import set_cli_config
-from funmedia.log.logger import logger
-from funmedia.utils.utils import (
-    split_dict_cookie,
-    get_resource_path,
-    get_cookie_from_browser,
-    check_invalid_naming,
-    merge_config,
-)
-from funmedia.utils.conf_manager import ConfigManager
 from funmedia.i18n.translator import TranslationManager, _
+from funmedia.log.logger import logger
+from funmedia.utils.conf_manager import ConfigManager
+from funmedia.utils.utils import (
+    check_invalid_naming,
+    get_cookie_from_browser,
+    get_resource_path,
+    merge_config,
+    split_dict_cookie,
+)
 
-# from funmedia.apps.douyin.handler import handle_sso_login
-from funmedia.apps.douyin.utils import ClientConfManager
+from .utils import ClientConfManager
 
 
 def handler_help(
@@ -73,9 +67,7 @@ def handler_auto_cookie(
             raise ValueError(_("无法从 {0} 浏览器中获取cookie").format(value))
 
         # 如果没有提供配置文件，那么使用高频配置文件
-        manager = ConfigManager(
-            ctx.params.get("config", get_resource_path(funmedia.APP_CONFIG_FILE_PATH))
-        )
+        manager = ConfigManager(ctx.params.get("config", get_resource_path(funmedia.APP_CONFIG_FILE_PATH)))
         manager.update_config_with_args("douyin", cookie=cookie_value)
     except PermissionError:
         logger.error(_("请关闭所有已打开的浏览器重试，并且你有适当的权限访问浏览器！"))
@@ -138,11 +130,7 @@ def handler_naming(
     invalid_patterns = check_invalid_naming(value, ALLOWED_PATTERNS, ALLOWED_SEPARATORS)
 
     if invalid_patterns:
-        raise click.BadParameter(
-            _("`{0}` 中的 `{1}` 不符合命名模式").format(
-                value, "".join(invalid_patterns)
-            )
-        )
+        raise click.BadParameter(_("`{0}` 中的 `{1}` 不符合命名模式").format(value, "".join(invalid_patterns)))
 
     return value
 
@@ -194,9 +182,7 @@ def handler_naming(
     "-u",
     type=str,
     # default="",
-    help=_(
-        "根据模式提供相应的链接。例如：主页、点赞、收藏作品填入主页链接，单作品填入作品链接，合集与直播同上"
-    ),
+    help=_("根据模式提供相应的链接。例如：主页、点赞、收藏作品填入主页链接，单作品填入作品链接，合集与直播同上"),
 )
 @click.option(
     "--music",
@@ -320,9 +306,7 @@ def handler_naming(
     "-P",
     type=str,
     nargs=2,
-    help=_(
-        "代理服务器，最多 2 个参数，http://与https://。空格区分 2 个参数 http://x.x.x.x https://x.x.x.x"
-    ),
+    help=_("代理服务器，最多 2 个参数，http://与https://。空格区分 2 个参数 http://x.x.x.x https://x.x.x.x"),
 )
 @click.option("--lyric", "-L", type=bool, help=_("是否保存原声歌词"))
 @click.option(
@@ -331,9 +315,7 @@ def handler_naming(
     is_flag=True,
     help=_("使用命令行选项更新配置文件。需要先使用'-c'选项提供一个配置文件路径"),
 )
-@click.option(
-    "--init-config", type=str, help=_("初始化配置文件。不能同时初始化和更新配置文件")
-)
+@click.option("--init-config", type=str, help=_("初始化配置文件。不能同时初始化和更新配置文件"))
 @click.option(
     "--auto-cookie",
     type=click.Choice(funmedia.BROWSER_LIST),
@@ -396,9 +378,7 @@ def douyin(
         raise click.UsageError(_("不能同时初始化和更新配置文件"))
     # 如果没有初始化配置文件，但是更新配置文件，则需要提供配置文件路径
     elif update_config and not config:
-        raise click.UsageError(
-            _("要更新配置，首先需要使用'-c'选项提供一个自定义配置文件路径")
-        )
+        raise click.UsageError(_("要更新配置，首先需要使用'-c'选项提供一个自定义配置文件路径"))
 
     # 读取自定义配置文件
     if config:

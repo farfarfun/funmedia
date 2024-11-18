@@ -1,6 +1,3 @@
-# path: f2/apps/douyin/api.py
-
-
 class DouyinAPIEndpoints:
     """
     API Endpoints for Douyin

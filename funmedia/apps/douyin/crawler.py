@@ -1,56 +1,54 @@
-# path: f2/apps/douyin/crawler.py
-
 import gzip
 import traceback
 
+from funmedia.crawlers.base_crawler import BaseCrawler, WebSocketCrawler
+from funmedia.i18n.translator import _
+from funmedia.log.logger import logger
+from funmedia.utils.utils import BaseEndpointManager
 from google.protobuf import json_format
 
-from funmedia.log.logger import logger
-from funmedia.i18n.translator import _
-from funmedia.crawlers.base_crawler import BaseCrawler, WebSocketCrawler
-from funmedia.utils.utils import BaseEndpointManager
-from funmedia.apps.douyin.api import DouyinAPIEndpoints as dyendpoint
-from funmedia.apps.douyin.model import (
-    UserProfile,
-    UserPost,
-    UserLike,
+from .api import DouyinAPIEndpoints as dyendpoint
+from .model import (
+    FollowingUserLive,
+    LiveImFetch,
+    LiveWebcast,
+    LoginCheckQr,
+    LoginGetQr,
+    PostDetail,
+    QueryUser,
     UserCollection,
     UserCollects,
     UserCollectsVideo,
-    UserMusicCollection,
-    PostDetail,
-    UserMix,
+    UserFollower,
+    UserFollowing,
+    UserLike,
     UserLive,
     UserLive2,
-    FollowingUserLive,
-    LoginGetQr,
-    LoginCheckQr,
-    UserFollowing,
-    UserFollower,
-    LiveWebcast,
-    LiveImFetch,
-    QueryUser,
+    UserMix,
+    UserMusicCollection,
+    UserPost,
+    UserProfile,
 )
-from funmedia.apps.douyin.utils import (
-    XBogusManager,
-    ABogusManager,
-    ClientConfManager,
-    TokenManager,
-)
-from funmedia.apps.douyin.proto.douyin_webcast_pb2 import (
+from .proto.douyin_webcast_pb2 import (
+    ChatMessage,
+    CommonTextMessage,
+    FansClubMessage,
+    GiftMessage,
+    LikeMessage,
+    MatchAgainstScoreMessage,
+    MemberMessage,
     PushFrame,
     Response,
     RoomMessage,
-    LikeMessage,
-    MemberMessage,
-    ChatMessage,
-    GiftMessage,
-    SocialMessage,
     RoomUserSeqMessage,
+    SocialMessage,
     UpdateFanTicketMessage,
-    CommonTextMessage,
-    MatchAgainstScoreMessage,
-    FansClubMessage,
+)
+from .utils import (
+    ABogusManager,
+    ClientConfManager,
+    TokenManager,
+    XBogusManager,
 )
 
 
@@ -309,14 +307,10 @@ class DouyinCrawler(BaseCrawler):
 class DouyinWebSocketCrawler(WebSocketCrawler):
     def __init__(self, kwargs: dict = ..., callbacks: dict = None):
         # 需要与cli同步
-        self.headers = kwargs.get("headers", {}) | {
-            "Cookie": f"ttwid={TokenManager.gen_ttwid()};"
-        }
+        self.headers = kwargs.get("headers", {}) | {"Cookie": f"ttwid={TokenManager.gen_ttwid()};"}
         self.callbacks = callbacks or {}
         self.timeout = kwargs.get("timeout", 10)
-        super().__init__(
-            wss_headers=self.headers, callbacks=self.callbacks, timeout=self.timeout
-        )
+        super().__init__(wss_headers=self.headers, callbacks=self.callbacks, timeout=self.timeout)
 
     async def fetch_live_danmaku(self, params: LiveWebcast):
         endpoint = BaseEndpointManager.model_2_endpoint(
@@ -355,9 +349,7 @@ class DouyinWebSocketCrawler(WebSocketCrawler):
                 if method in self.callbacks:
                     await self.callbacks[method](data=payload)
                 else:
-                    logger.warning(
-                        _("未找到对应的回调函数处理消息：{0}").format(method)
-                    )
+                    logger.warning(_("未找到对应的回调函数处理消息：{0}").format(method))
 
         except Exception:
             logger.error(traceback.format_exc())
@@ -404,21 +396,15 @@ class DouyinWebSocketCrawler(WebSocketCrawler):
     async def WebcastRoomMessage(cls, data: bytes):
         roomMessage = RoomMessage()
         roomMessage.ParseFromString(data)
-        data_dict = json_format.MessageToDict(
-            roomMessage, preserving_proto_field_name=True
-        )
-        logger.info(
-            _("[WebcastRoomMessage] [🏠房间消息] ｜ {0}").format(data_dict.get("room"))
-        )
+        data_dict = json_format.MessageToDict(roomMessage, preserving_proto_field_name=True)
+        logger.info(_("[WebcastRoomMessage] [🏠房间消息] ｜ {0}").format(data_dict.get("room")))
         return data_dict
 
     @classmethod
     async def WebcastLikeMessage(cls, data: bytes):
         likeMessage = LikeMessage()
         likeMessage.ParseFromString(data)
-        data_dict = json_format.MessageToDict(
-            likeMessage, preserving_proto_field_name=True
-        )
+        data_dict = json_format.MessageToDict(likeMessage, preserving_proto_field_name=True)
         logger.info(
             "[WebcastLikeMessage] [👍点赞消息] ｜ "
             + "[用户Id：{0}] [当前用户点赞：{1}] [总点赞：{2}]".format(
@@ -433,9 +419,7 @@ class DouyinWebSocketCrawler(WebSocketCrawler):
     async def WebcastMemberMessage(cls, data: bytes):
         memberMessage = MemberMessage()
         memberMessage.ParseFromString(data)
-        data_dict = json_format.MessageToDict(
-            memberMessage, preserving_proto_field_name=True
-        )
+        data_dict = json_format.MessageToDict(memberMessage, preserving_proto_field_name=True)
         logger.info(
             f"[WebcastMemberMessage] [🚺观众加入消息] ｜ [用户Id：{data_dict.get('user').get('id')} 用户名：{data_dict.get('user').get('nickname')}]"
         )
@@ -445,51 +429,31 @@ class DouyinWebSocketCrawler(WebSocketCrawler):
     async def WebcastChatMessage(cls, data: bytes):
         chatMessage = ChatMessage()
         chatMessage.ParseFromString(data)
-        data_dict = json_format.MessageToDict(
-            chatMessage, preserving_proto_field_name=True
-        )
-        logger.info(
-            _("[WebcastChatMessage] [💬聊天消息] ｜ {0}").format(
-                data_dict.get("content")
-            )
-        )
+        data_dict = json_format.MessageToDict(chatMessage, preserving_proto_field_name=True)
+        logger.info(_("[WebcastChatMessage] [💬聊天消息] ｜ {0}").format(data_dict.get("content")))
         return data
 
     @classmethod
     async def WebcastGiftMessage(cls, data: bytes):
         giftMessage = GiftMessage()
         giftMessage.ParseFromString(data)
-        data_dict = json_format.MessageToDict(
-            giftMessage, preserving_proto_field_name=True
-        )
-        logger.info(
-            _("[WebcastGiftMessage] [🎁礼物消息] | [{0}]").format(
-                data_dict.get("common").get("describe")
-            )
-        )
+        data_dict = json_format.MessageToDict(giftMessage, preserving_proto_field_name=True)
+        logger.info(_("[WebcastGiftMessage] [🎁礼物消息] | [{0}]").format(data_dict.get("common").get("describe")))
         return data_dict
 
     @classmethod
     async def WebcastSocialMessage(cls, data: bytes):
         socialMessage = SocialMessage()
         socialMessage.ParseFromString(data)
-        data_dict = json_format.MessageToDict(
-            socialMessage, preserving_proto_field_name=True
-        )
-        logger.info(
-            _("[WebcastSocialMessage] [➕用户关注消息] | [{0}]").format(
-                data_dict.get("user").get("id")
-            )
-        )
+        data_dict = json_format.MessageToDict(socialMessage, preserving_proto_field_name=True)
+        logger.info(_("[WebcastSocialMessage] [➕用户关注消息] | [{0}]").format(data_dict.get("user").get("id")))
         return data_dict
 
     @classmethod
     async def WebcastRoomUserSeqMessage(cls, data: bytes):
         roomUserSeqMessage = RoomUserSeqMessage()
         roomUserSeqMessage.ParseFromString(data)
-        data_dict = json_format.MessageToDict(
-            roomUserSeqMessage, preserving_proto_field_name=True
-        )
+        data_dict = json_format.MessageToDict(roomUserSeqMessage, preserving_proto_field_name=True)
 
         logger.info(
             _("[WebcastRoomUserSeqMessage] [👥在线观众排行榜] | [{0} {1} {2}]").format(
@@ -504,14 +468,10 @@ class DouyinWebSocketCrawler(WebSocketCrawler):
     async def WebcastUpdateFanTicketMessage(cls, data: bytes):
         updateFanTicketMessage = UpdateFanTicketMessage()
         updateFanTicketMessage.ParseFromString(data)
-        data_dict = json_format.MessageToDict(
-            updateFanTicketMessage, preserving_proto_field_name=True
-        )
+        data_dict = json_format.MessageToDict(updateFanTicketMessage, preserving_proto_field_name=True)
 
         logger.info(
-            _("[WebcastUpdateFanTicketMessage] [🎟️粉丝票更新消息] | [{0}]").format(
-                data_dict.get("roomFanTicketCount")
-            )
+            _("[WebcastUpdateFanTicketMessage] [🎟️粉丝票更新消息] | [{0}]").format(data_dict.get("roomFanTicketCount"))
         )
         return data_dict
 
@@ -519,43 +479,27 @@ class DouyinWebSocketCrawler(WebSocketCrawler):
     async def WebcastCommonTextMessage(cls, data: bytes):
         commonTextMessage = CommonTextMessage()
         commonTextMessage.ParseFromString(data)
-        data_dict = json_format.MessageToDict(
-            commonTextMessage, preserving_proto_field_name=True
-        )
+        data_dict = json_format.MessageToDict(commonTextMessage, preserving_proto_field_name=True)
 
-        logger.info(
-            _("[WebcastCommonTextMessage] [📝文本消息] | [{0}]").format(data_dict)
-        )
+        logger.info(_("[WebcastCommonTextMessage] [📝文本消息] | [{0}]").format(data_dict))
         return data_dict
 
     @classmethod
     async def WebcastMatchAgainstScoreMessage(cls, data: bytes):
         matchAgainstScoreMessage = MatchAgainstScoreMessage()
         matchAgainstScoreMessage.ParseFromString(data)
-        data_dict = json_format.MessageToDict(
-            matchAgainstScoreMessage, preserving_proto_field_name=True
-        )
+        data_dict = json_format.MessageToDict(matchAgainstScoreMessage, preserving_proto_field_name=True)
 
-        logger.info(
-            _("[WebcastMatchAgainstScoreMessage] [🏆对战积分消息] | [{0}]").format(
-                data_dict
-            )
-        )
+        logger.info(_("[WebcastMatchAgainstScoreMessage] [🏆对战积分消息] | [{0}]").format(data_dict))
         return data_dict
 
     @classmethod
     async def WebcastFansclubMessage(cls, data: bytes):
         fansClubMessage = FansClubMessage()
         fansClubMessage.ParseFromString(data)
-        data_dict = json_format.MessageToDict(
-            fansClubMessage, preserving_proto_field_name=True
-        )
+        data_dict = json_format.MessageToDict(fansClubMessage, preserving_proto_field_name=True)
 
-        logger.info(
-            _("[WebcastFansclubMessage] [🎉粉丝团消息] | [{0}]").format(
-                data_dict.get("content")
-            )
-        )
+        logger.info(_("[WebcastFansclubMessage] [🎉粉丝团消息] | [{0}]").format(data_dict.get("content")))
         return data_dict
 
     async def __aenter__(self):

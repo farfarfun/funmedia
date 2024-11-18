@@ -1,80 +1,72 @@
-# path: f2/apps/douyin/handler.py
-
 import asyncio
 from pathlib import Path
-from typing import AsyncGenerator, Union, Dict, Any, List
+from typing import Any, AsyncGenerator, List, Union
 
-from funmedia.log.logger import logger
+from funmedia.cli.cli_console import RichConsoleManager
+from funmedia.exceptions.api_exceptions import APIResponseError
 from funmedia.i18n.translator import _
-from funmedia.utils.decorators import mode_handler, mode_function_map
+from funmedia.log.logger import logger
+from funmedia.utils.decorators import mode_function_map, mode_handler
 
-# from funmedia.utils.utils import split_set_cookie
-from funmedia.apps.douyin.db import AsyncUserDB, AsyncVideoDB
-from funmedia.apps.douyin.crawler import DouyinCrawler, DouyinWebSocketCrawler
-from funmedia.apps.douyin.dl import DouyinDownloader
-from funmedia.apps.douyin.model import (
-    UserPost,
-    UserProfile,
-    UserLike,
-    UserCollection,
-    UserCollects,
-    UserCollectsVideo,
-    UserMusicCollection,
-    UserMix,
-    PostDetail,
-    UserLive,
-    UserLive2,
-    # LoginGetQr,
-    # LoginCheckQr,
-    UserFollowing,
-    UserFollower,
-    PostRelated,
-    FriendFeed,
-    LiveWebcast,
-    LiveImFetch,
-    QueryUser,
-    FollowingUserLive,
-)
-from funmedia.apps.douyin.filter import (
-    UserPostFilter,
-    UserProfileFilter,
+from .algorithm.webcast_signature import DouyinWebcastSignature
+from .crawler import DouyinCrawler, DouyinWebSocketCrawler
+from .db import AsyncUserDB, AsyncVideoDB
+from .dl import DouyinDownloader
+from .filter import (
+    FollowingUserLiveFilter,
+    FriendFeedFilter,
+    LiveImFetchFilter,
+    PostDetailFilter,
+    PostRelatedFilter,
+    QueryUserFilter,
     UserCollectionFilter,
     UserCollectsFilter,
-    UserMusicCollectionFilter,
-    UserMixFilter,
-    PostDetailFilter,
-    UserLiveFilter,
-    UserLive2Filter,
+    UserFollowerFilter,
     # GetQrcodeFilter,
     # CheckQrcodeFilter,
     UserFollowingFilter,
-    UserFollowerFilter,
-    PostRelatedFilter,
-    FriendFeedFilter,
-    LiveImFetchFilter,
-    QueryUserFilter,
-    FollowingUserLiveFilter,
+    UserLive2Filter,
+    UserLiveFilter,
+    UserMixFilter,
+    UserMusicCollectionFilter,
+    UserPostFilter,
+    UserProfileFilter,
 )
-from funmedia.apps.douyin.algorithm.webcast_signature import DouyinWebcastSignature
-from funmedia.apps.douyin.utils import (
-    SecUserIdFetcher,
+from .model import (
+    FollowingUserLive,
+    FriendFeed,
+    LiveImFetch,
+    LiveWebcast,
+    PostDetail,
+    PostRelated,
+    QueryUser,
+    UserCollection,
+    UserCollects,
+    UserCollectsVideo,
+    UserFollower,
+    UserFollowing,
+    UserLike,
+    UserLive,
+    UserLive2,
+    UserMix,
+    UserMusicCollection,
+    UserPost,
+    UserProfile,
+)
+from .utils import (
     AwemeIdFetcher,
-    MixIdFetcher,
-    WebCastIdFetcher,
     ClientConfManager,
-    # VerifyFpManager,
+    MixIdFetcher,
+    SecUserIdFetcher,
+    WebCastIdFetcher,
     create_or_rename_user_folder,
-    # show_qrcode,
 )
-from funmedia.cli.cli_console import RichConsoleManager
-from funmedia.exceptions.api_exceptions import APIResponseError
 
 rich_console = RichConsoleManager().rich_console
 rich_prompt = RichConsoleManager().rich_prompt
 
 
 class DouyinHandler:
-
     # 需要忽略的字段（需过滤掉有时效性的字段）
     ignore_fields = ["video_play_addr", "images", "video_bit_rate", "cover"]
 
@@ -102,9 +94,7 @@ class DouyinHandler:
             response = await crawler.fetch_user_profile(params)
             user = UserProfileFilter(response)
             if user.nickname is None:
-                raise APIResponseError(
-                    _("`fetch_user_profile`请求失败，请更换cookie或稍后再试")
-                )
+                raise APIResponseError(_("`fetch_user_profile`请求失败，请更换cookie或稍后再试"))
             return UserProfileFilter(response)
 
     async def get_or_add_user_data(
@@ -136,9 +126,7 @@ class DouyinHandler:
         current_nickname = current_user_data.nickname
 
         # 设置用户目录
-        user_path = create_or_rename_user_folder(
-            kwargs, local_user_data, current_nickname
-        )
+        user_path = create_or_rename_user_folder(kwargs, local_user_data, current_nickname)
 
         # 如果用户不在数据库中，将其添加到数据库
         if not local_user_data:
@@ -187,21 +175,15 @@ class DouyinHandler:
         aweme_data = await self.fetch_one_video(aweme_id)
 
         async with AsyncUserDB("douyin_users.db") as db:
-            user_path = await self.get_or_add_user_data(
-                self.kwargs, aweme_data.sec_user_id, db
-            )
+            user_path = await self.get_or_add_user_data(self.kwargs, aweme_data.sec_user_id, db)
 
         async with AsyncVideoDB("douyin_videos.db") as db:
-            await self.get_or_add_video_data(
-                aweme_data._to_dict(), db, self.ignore_fields
-            )
+            await self.get_or_add_video_data(aweme_data._to_dict(), db, self.ignore_fields)
 
         logger.debug(_("单个作品数据：{0}").format(aweme_data._to_dict()))
 
         # 创建下载任务
-        await self.downloader.create_download_tasks(
-            self.kwargs, aweme_data._to_dict(), user_path
-        )
+        await self.downloader.create_download_tasks(self.kwargs, aweme_data._to_dict(), user_path)
 
     async def fetch_one_video(
         self,
@@ -223,11 +205,7 @@ class DouyinHandler:
             response = await crawler.fetch_post_detail(params)
             video = PostDetailFilter(response)
 
-        logger.debug(
-            _("作品ID：{0} 作品文案：{1} 作者：{2}").format(
-                video.aweme_id, video.desc, video.nickname
-            )
-        )
+        logger.debug(_("作品ID：{0} 作品文案：{1} 作者：{2}").format(video.aweme_id, video.desc, video.nickname))
 
         return video
 
@@ -250,13 +228,9 @@ class DouyinHandler:
         async with AsyncUserDB("douyin_users.db") as udb:
             user_path = await self.get_or_add_user_data(self.kwargs, sec_user_id, udb)
 
-        async for aweme_data_list in self.fetch_user_post_videos(
-            sec_user_id, max_cursor, page_counts, max_counts
-        ):
+        async for aweme_data_list in self.fetch_user_post_videos(sec_user_id, max_cursor, page_counts, max_counts):
             # 创建下载任务
-            await self.downloader.create_download_tasks(
-                self.kwargs, aweme_data_list._to_list(), user_path
-            )
+            await self.downloader.create_download_tasks(self.kwargs, aweme_data_list._to_list(), user_path)
 
             # # 一次性批量插入作品数据到数据库
             # async with AsyncVideoDB("douyin_videos.db") as db:
@@ -291,11 +265,7 @@ class DouyinHandler:
             current_request_size = min(page_counts, max_counts - videos_collected)
 
             logger.debug("===================================")
-            logger.debug(
-                _("最大数量：{0} 每次请求数量：{1}").format(
-                    max_counts, current_request_size
-                )
-            )
+            logger.debug(_("最大数量：{0} 每次请求数量：{1}").format(max_counts, current_request_size))
             logger.info(_("开始爬取第 {0} 页").format(max_cursor))
 
             async with DouyinCrawler(self.kwargs) as crawler:
@@ -318,11 +288,7 @@ class DouyinHandler:
                 continue
 
             logger.debug(_("当前请求的max_cursor：{0}").format(max_cursor))
-            logger.debug(
-                _("作品ID：{0} 作品文案：{1} 作者：{2}").format(
-                    video.aweme_id, video.desc, video.nickname
-                )
-            )
+            logger.debug(_("作品ID：{0} 作品文案：{1} 作者：{2}").format(video.aweme_id, video.desc, video.nickname))
             logger.debug("===================================")
 
             # 更新已经处理的作品数量 (Update the number of videos processed)
@@ -353,13 +319,9 @@ class DouyinHandler:
         async with AsyncUserDB("douyin_users.db") as db:
             user_path = await self.get_or_add_user_data(self.kwargs, sec_user_id, db)
 
-        async for aweme_data_list in self.fetch_user_like_videos(
-            sec_user_id, max_cursor, page_counts, max_counts
-        ):
+        async for aweme_data_list in self.fetch_user_like_videos(sec_user_id, max_cursor, page_counts, max_counts):
             # 创建下载任务
-            await self.downloader.create_download_tasks(
-                self.kwargs, aweme_data_list._to_list(), user_path
-            )
+            await self.downloader.create_download_tasks(self.kwargs, aweme_data_list._to_list(), user_path)
 
             # async with AsyncVideoDB("douyin_videos.db") as db:
             #     for aweme_data in aweme_data_list:
@@ -398,11 +360,7 @@ class DouyinHandler:
             current_request_size = min(page_counts, max_counts - videos_collected)
 
             logger.debug("===================================")
-            logger.debug(
-                _("最大数量：{0} 每次请求数量：{1}").format(
-                    max_counts, current_request_size
-                )
-            )
+            logger.debug(_("最大数量：{0} 每次请求数量：{1}").format(max_counts, current_request_size))
             logger.info(_("开始爬取第 {0} 页").format(max_cursor))
 
             async with DouyinCrawler(self.kwargs) as crawler:
@@ -425,11 +383,7 @@ class DouyinHandler:
                 continue
 
             logger.debug(_("当前请求的max_cursor：{0}").format(max_cursor))
-            logger.debug(
-                _("作品ID：{0} 作品文案：{1} 作者：{2}").format(
-                    like.aweme_id, like.desc, like.nickname
-                )
-            )
+            logger.debug(_("作品ID：{0} 作品文案：{1} 作者：{2}").format(like.aweme_id, like.desc, like.nickname))
             logger.debug("===================================")
 
             # 更新已经处理的作品数量 (Update the number of videos processed)
@@ -464,13 +418,9 @@ class DouyinHandler:
         async with AsyncUserDB("douyin_users.db") as db:
             user_path = await self.get_or_add_user_data(self.kwargs, sec_user_id, db)
 
-        async for aweme_data_list in self.fetch_user_music_collection(
-            max_cursor, page_counts, max_counts
-        ):
+        async for aweme_data_list in self.fetch_user_music_collection(max_cursor, page_counts, max_counts):
             # 创建下载任务
-            await self.downloader.create_music_download_tasks(
-                self.kwargs, aweme_data_list._to_list(), user_path
-            )
+            await self.downloader.create_music_download_tasks(self.kwargs, aweme_data_list._to_list(), user_path)
 
     async def fetch_user_music_collection(
         self,
@@ -499,17 +449,11 @@ class DouyinHandler:
             current_request_size = min(page_counts, max_counts - music_collected)
 
             logger.debug("===================================")
-            logger.debug(
-                _("最大数量：{0} 每次请求数量：{1}").format(
-                    max_counts, current_request_size
-                )
-            )
+            logger.debug(_("最大数量：{0} 每次请求数量：{1}").format(max_counts, current_request_size))
             logger.info(_("开始爬取第 {0} 页").format(max_cursor))
 
             async with DouyinCrawler(self.kwargs) as crawler:
-                params = UserMusicCollection(
-                    cursor=max_cursor, count=current_request_size
-                )
+                params = UserMusicCollection(cursor=max_cursor, count=current_request_size)
                 response = await crawler.fetch_user_music_collection(params)
                 music = UserMusicCollectionFilter(response)
                 yield music
@@ -519,11 +463,7 @@ class DouyinHandler:
                 break
 
             logger.debug(_("当前请求的max_cursor：{0}").format(max_cursor))
-            logger.debug(
-                _("音乐ID：{0} 音乐标题：{1} 作者：{2}").format(
-                    music.music_id, music.title, music.author
-                )
-            )
+            logger.debug(_("音乐ID：{0} 音乐标题：{1} 作者：{2}").format(music.music_id, music.title, music.author))
             logger.debug("===================================")
 
             # 更新已经处理的音乐数量 (Update the number of music processed)
@@ -557,12 +497,8 @@ class DouyinHandler:
         async with AsyncUserDB("douyin_users.db") as db:
             user_path = await self.get_or_add_user_data(self.kwargs, sec_user_id, db)
 
-        async for aweme_data_list in self.fetch_user_collection_videos(
-            max_cursor, page_counts, max_counts
-        ):
-            await self.downloader.create_download_tasks(
-                self.kwargs, aweme_data_list._to_list(), user_path
-            )
+        async for aweme_data_list in self.fetch_user_collection_videos(max_cursor, page_counts, max_counts):
+            await self.downloader.create_download_tasks(self.kwargs, aweme_data_list._to_list(), user_path)
 
     async def fetch_user_collection_videos(
         self,
@@ -596,11 +532,7 @@ class DouyinHandler:
             current_request_size = min(page_counts, max_counts - videos_collected)
 
             logger.debug("===================================")
-            logger.debug(
-                _("最大数量: {0} 每次请求数量: {1}").format(
-                    max_counts, current_request_size
-                )
-            )
+            logger.debug(_("最大数量: {0} 每次请求数量: {1}").format(max_counts, current_request_size))
             logger.info(_("开始爬取第 {0} 页").format(max_cursor))
 
             async with DouyinCrawler(self.kwargs) as crawler:
@@ -653,9 +585,7 @@ class DouyinHandler:
         async with AsyncUserDB("douyin_users.db") as db:
             user_path = await self.get_or_add_user_data(self.kwargs, sec_user_id, db)
 
-        async for collects in self.fetch_user_collects(
-            max_cursor, page_counts, max_counts
-        ):
+        async for collects in self.fetch_user_collects(max_cursor, page_counts, max_counts):
             choose_collects_id = await self.select_user_collects(collects)
 
             if isinstance(choose_collects_id, str):
@@ -667,29 +597,18 @@ class DouyinHandler:
                 # 例如: 用户名/收藏夹名/作品名.mp4
                 if self.kwargs.get("folderize"):
                     tmp_user_path = user_path
-                    tmp_user_path = (
-                        tmp_user_path
-                        / collects.collects_name[
-                            collects.collects_id.index(int(collects_id))
-                        ]
-                    )
+                    tmp_user_path = tmp_user_path / collects.collects_name[collects.collects_id.index(int(collects_id))]
                 else:
                     tmp_user_path = user_path
 
                 async for aweme_data_list in self.fetch_user_collects_videos(
                     collects_id, max_cursor, page_counts, max_counts
                 ):
-                    await self.downloader.create_download_tasks(
-                        self.kwargs, aweme_data_list._to_list(), tmp_user_path
-                    )
+                    await self.downloader.create_download_tasks(self.kwargs, aweme_data_list._to_list(), tmp_user_path)
 
-            logger.info(
-                _("爬取结束，共爬取 {0} 个收藏夹").format(len(choose_collects_id))
-            )
+            logger.info(_("爬取结束，共爬取 {0} 个收藏夹").format(len(choose_collects_id)))
 
-    async def select_user_collects(
-        self, collects: UserCollectsFilter
-    ) -> Union[str, List[str]]:
+    async def select_user_collects(self, collects: UserCollectsFilter) -> Union[str, List[str]]:
         """
         用于选择收藏夹
         (Used to select the collection)
@@ -704,9 +623,7 @@ class DouyinHandler:
         rich_console.print(_("0: [bold]全部下载[/bold]"))
         for i in range(len(collects.collects_id)):
             rich_console.print(
-                _(
-                    "{0}：{1} (包含 {2} 个作品[以网页实际数量为准]，收藏夹ID {3})"
-                ).format(
+                _("{0}：{1} (包含 {2} 个作品[以网页实际数量为准]，收藏夹ID {3})").format(
                     i + 1,
                     collects.collects_name[i],
                     collects.total_number[i],
@@ -754,11 +671,7 @@ class DouyinHandler:
 
         while collected < max_counts:
             logger.debug("===================================")
-            logger.debug(
-                _("当前请求的max_cursor：{0}， max_counts：{1}").format(
-                    max_cursor, max_counts
-                )
-            )
+            logger.debug(_("当前请求的max_cursor：{0}， max_counts：{1}").format(max_cursor, max_counts))
 
             async with DouyinCrawler(self.kwargs) as crawler:
                 params = UserCollects(cursor=max_cursor, count=page_counts)
@@ -772,11 +685,7 @@ class DouyinHandler:
             if not collects.has_more:
                 break
 
-            logger.debug(
-                _("收藏夹ID：{0} 收藏夹标题：{1}").format(
-                    collects.collects_id, collects.collects_name
-                )
-            )
+            logger.debug(_("收藏夹ID：{0} 收藏夹标题：{1}").format(collects.collects_id, collects.collects_name))
             logger.debug("===================================")
 
             max_cursor = collects.max_cursor
@@ -817,11 +726,7 @@ class DouyinHandler:
             current_request_size = min(page_counts, max_counts - videos_collected)
 
             logger.debug("===================================")
-            logger.debug(
-                _("最大数量：{0} 每次请求数量：{1}").format(
-                    max_counts, current_request_size
-                )
-            )
+            logger.debug(_("最大数量：{0} 每次请求数量：{1}").format(max_counts, current_request_size))
             logger.info(_("开始爬取第 {0} 页").format(max_cursor))
 
             async with DouyinCrawler(self.kwargs) as crawler:
@@ -843,9 +748,7 @@ class DouyinHandler:
 
                     logger.debug(_("当前请求的max_cursor：{0}").format(max_cursor))
                     logger.debug(
-                        _("视频ID：{0} 视频文案：{1} 作者：{2}").format(
-                            video.aweme_id, video.desc, video.nickname
-                        )
+                        _("视频ID：{0} 视频文案：{1} 作者：{2}").format(video.aweme_id, video.desc, video.nickname)
                     )
                     logger.debug("=====================================")
 
@@ -863,11 +766,7 @@ class DouyinHandler:
             logger.info(_("等待 {0} 秒后继续").format(self.kwargs.get("timeout", 5)))
             await asyncio.sleep(self.kwargs.get("timeout", 5))
 
-        logger.info(
-            _("收藏夹：{0} 所有作品采集完毕，共爬取 {1} 个作品").format(
-                collects_id, videos_collected
-            )
-        )
+        logger.info(_("收藏夹：{0} 所有作品采集完毕，共爬取 {1} 个作品").format(collects_id, videos_collected))
 
     @mode_handler("mix")
     async def handle_user_mix(self):
@@ -901,13 +800,9 @@ class DouyinHandler:
         async with AsyncUserDB("douyin_users.db") as db:
             user_path = await self.get_or_add_user_data(self.kwargs, sec_user_id, db)
 
-        async for aweme_data_list in self.fetch_user_mix_videos(
-            mix_id, max_cursor, page_counts, max_counts
-        ):
+        async for aweme_data_list in self.fetch_user_mix_videos(mix_id, max_cursor, page_counts, max_counts):
             # 创建下载任务
-            await self.downloader.create_download_tasks(
-                self.kwargs, aweme_data_list._to_list(), user_path
-            )
+            await self.downloader.create_download_tasks(self.kwargs, aweme_data_list._to_list(), user_path)
 
         # async with AsyncVideoDB("douyin_videos.db") as db:
         #     for aweme_data in aweme_data_list._to_list():
@@ -942,17 +837,11 @@ class DouyinHandler:
             current_request_size = min(page_counts, max_counts - videos_collected)
 
             logger.debug("===================================")
-            logger.debug(
-                _("最大数量: {0} 每次请求数量: {1}").format(
-                    max_counts, current_request_size
-                )
-            )
+            logger.debug(_("最大数量: {0} 每次请求数量: {1}").format(max_counts, current_request_size))
             logger.info(_("开始爬取第 {0} 页").format(max_cursor))
 
             async with DouyinCrawler(self.kwargs) as crawler:
-                params = UserMix(
-                    cursor=max_cursor, count=current_request_size, mix_id=mix_id
-                )
+                params = UserMix(cursor=max_cursor, count=current_request_size, mix_id=mix_id)
                 response = await crawler.fetch_user_mix(params)
                 mix = UserMixFilter(response)
                 yield mix
@@ -962,11 +851,7 @@ class DouyinHandler:
                 break
 
             logger.debug(_("当前请求的max_cursor: {0}").format(max_cursor))
-            logger.debug(
-                _("作品ID: {0} 作品文案: {1} 作者: {2}").format(
-                    mix.aweme_id, mix.desc, mix.nickname
-                )
-            )
+            logger.debug(_("作品ID: {0} 作品文案: {1} 作者: {2}").format(mix.aweme_id, mix.desc, mix.nickname))
             logger.debug("===================================")
 
             # 更新已经处理的作品数量 (Update the number of videos processed)
@@ -1005,9 +890,7 @@ class DouyinHandler:
         async with AsyncUserDB("douyin_users.db") as db:
             user_path = await self.get_or_add_user_data(self.kwargs, sec_user_id, db)
 
-        await self.downloader.create_stream_tasks(
-            self.kwargs, webcast_data._to_dict(), user_path
-        )
+        await self.downloader.create_stream_tasks(self.kwargs, webcast_data._to_dict(), user_path)
 
     async def fetch_user_live_videos(
         self,
@@ -1039,11 +922,7 @@ class DouyinHandler:
                 live.room_id, live.live_title, live.live_status, live.user_count
             )
         )
-        logger.debug(
-            _("子分区: {0} 主播昵称: {1}").format(
-                live.sub_partition_title, live.nickname
-            )
-        )
+        logger.debug(_("子分区: {0} 主播昵称: {1}").format(live.sub_partition_title, live.nickname))
         logger.debug("===================================")
         logger.info(_("直播信息爬取结束"))
 
@@ -1083,9 +962,7 @@ class DouyinHandler:
             _("主播昵称: {0} 开播时间: {1} 直播流清晰度: {2}").format(
                 live.nickname,
                 live.create_time,
-                "、".join(
-                    [f"{key}: {value}" for key, value in live.resolution_name.items()]
-                ),
+                "、".join([f"{key}: {value}" for key, value in live.resolution_name.items()]),
             )
         )
         logger.debug("===================================")
@@ -1111,13 +988,9 @@ class DouyinHandler:
         async with AsyncUserDB("douyin_users.db") as db:
             user_path = await self.get_or_add_user_data(self.kwargs, sec_user_id, db)
 
-        async for aweme_data_list in self.fetch_user_feed_videos(
-            sec_user_id, max_cursor, page_counts, max_counts
-        ):
+        async for aweme_data_list in self.fetch_user_feed_videos(sec_user_id, max_cursor, page_counts, max_counts):
             # 创建下载任务
-            await self.downloader.create_download_tasks(
-                self.kwargs, aweme_data_list._to_list(), user_path
-            )
+            await self.downloader.create_download_tasks(self.kwargs, aweme_data_list._to_list(), user_path)
 
     async def fetch_user_feed_videos(
         self,
@@ -1148,11 +1021,7 @@ class DouyinHandler:
             current_request_size = min(page_counts, max_counts - videos_collected)
 
             logger.debug("===================================")
-            logger.debug(
-                _("最大数量: {0} 每次请求数量: {1}").format(
-                    max_counts, current_request_size
-                )
-            )
+            logger.debug(_("最大数量: {0} 每次请求数量: {1}").format(max_counts, current_request_size))
             logger.info(_("开始爬取第 {0} 页").format(max_cursor))
 
             async with DouyinCrawler(self.kwargs) as crawler:
@@ -1175,11 +1044,7 @@ class DouyinHandler:
                 continue
 
             logger.debug(_("当前请求的max_cursor: {0}").format(max_cursor))
-            logger.debug(
-                _("作品ID: {0} 作品文案: {1} 作者: {2}").format(
-                    feed.aweme_id, feed.desc, feed.nickname
-                )
-            )
+            logger.debug(_("作品ID: {0} 作品文案: {1} 作者: {2}").format(feed.aweme_id, feed.desc, feed.nickname))
             logger.debug("===================================")
 
             # 更新已经处理的作品数量 (Update the number of videos processed)
@@ -1208,20 +1073,11 @@ class DouyinHandler:
         aweme_data = await self.fetch_one_video(aweme_id)
 
         async with AsyncUserDB("douyin_users.db") as udb:
-            user_path = (
-                await self.get_or_add_user_data(
-                    self.kwargs, aweme_data.sec_user_id, udb
-                )
-                / aweme_id
-            )
+            user_path = await self.get_or_add_user_data(self.kwargs, aweme_data.sec_user_id, udb) / aweme_id
 
-        async for aweme_data_list in self.fetch_related_videos(
-            aweme_id, "", page_counts, max_counts
-        ):
+        async for aweme_data_list in self.fetch_related_videos(aweme_id, "", page_counts, max_counts):
             # 创建下载任务
-            await self.downloader.create_download_tasks(
-                self.kwargs, aweme_data_list._to_list(), user_path
-            )
+            await self.downloader.create_download_tasks(self.kwargs, aweme_data_list._to_list(), user_path)
 
     async def fetch_related_videos(
         self,
@@ -1255,11 +1111,7 @@ class DouyinHandler:
             current_request_size = min(page_counts, max_counts - videos_collected)
 
             logger.debug("===================================")
-            logger.debug(
-                _("最大数量: {0} 每次请求数量: {1}").format(
-                    max_counts, current_request_size
-                )
-            )
+            logger.debug(_("最大数量: {0} 每次请求数量: {1}").format(max_counts, current_request_size))
             logger.info(_("开始爬取前 {0} 个相关推荐").format(current_request_size))
 
             async with DouyinCrawler(self.kwargs) as crawler:
@@ -1278,9 +1130,7 @@ class DouyinHandler:
 
             logger.debug(_("当前请求的相关推荐数量: {0}").format(len(related.aweme_id)))
             logger.debug(
-                _("作品ID: {0} 作品文案: {1} 作者: {2}").format(
-                    related.aweme_id, related.desc, related.nickname
-                )
+                _("作品ID: {0} 作品文案: {1} 作者: {2}").format(related.aweme_id, related.desc, related.nickname)
             )
             logger.debug("===================================")
 
@@ -1311,13 +1161,9 @@ class DouyinHandler:
         async with AsyncUserDB("douyin_users.db") as db:
             user_path = await self.get_or_add_user_data(self.kwargs, sec_user_id, db)
 
-        async for aweme_data_list in self.fetch_friend_feed_videos(
-            max_counts=max_counts
-        ):
+        async for aweme_data_list in self.fetch_friend_feed_videos(max_counts=max_counts):
             # 创建下载任务
-            await self.downloader.create_download_tasks(
-                self.kwargs, aweme_data_list._to_list(), user_path
-            )
+            await self.downloader.create_download_tasks(self.kwargs, aweme_data_list._to_list(), user_path)
 
     async def fetch_friend_feed_videos(
         self,
@@ -1345,7 +1191,6 @@ class DouyinHandler:
         logger.info(_("开始爬取好友作品"))
 
         while videos_collected < max_counts:
-
             logger.debug("===================================")
             logger.debug(_("最大数量：{0} 个").format(max_counts))
             logger.info(_("开始爬取第：{0} 页").format(cursor))
@@ -1364,11 +1209,7 @@ class DouyinHandler:
                 break
 
             if friend.status_code != 0:
-                logger.warning(
-                    _("请求失败，错误码：{0} 错误信息：{1}").format(
-                        friend.status_code, friend.status_msg
-                    )
-                )
+                logger.warning(_("请求失败，错误码：{0} 错误信息：{1}").format(friend.status_code, friend.status_msg))
                 break
             else:
                 # 因为没有好友作品第一页也会返回has_more为False，所以需要访问下一页判断是否有作品
@@ -1377,11 +1218,7 @@ class DouyinHandler:
                     continue
 
             logger.debug(_("当前请求的cursor: {0}").format(cursor))
-            logger.debug(
-                _("作品ID: {0} 作品文案: {1} 作者: {2}").format(
-                    friend.aweme_id, friend.desc, friend.nickname
-                )
-            )
+            logger.debug(_("作品ID: {0} 作品文案: {1} 作者: {2}").format(friend.aweme_id, friend.desc, friend.nickname))
             logger.debug("===================================")
 
             yield friend
@@ -1438,9 +1275,7 @@ class DouyinHandler:
             current_request_size = min(count, max_counts - users_collected)
 
             logger.debug("===================================")
-            logger.debug(
-                _("最大数量：{0} 每次请求数量：{1}").format(count, current_request_size)
-            )
+            logger.debug(_("最大数量：{0} 每次请求数量：{1}").format(count, current_request_size))
 
             async with DouyinCrawler(self.kwargs) as crawler:
                 params = UserFollowing(
@@ -1520,9 +1355,7 @@ class DouyinHandler:
             current_request_size = min(count, max_counts - users_collected)
 
             logger.debug("===================================")
-            logger.debug(
-                _("最大数量：{0} 每次请求数量：{1}").format(count, current_request_size)
-            )
+            logger.debug(_("最大数量：{0} 每次请求数量：{1}").format(count, current_request_size))
 
             async with DouyinCrawler(self.kwargs) as crawler:
                 params = UserFollower(
@@ -1542,9 +1375,7 @@ class DouyinHandler:
                 logger.info(_("用户：{0} 所有粉丝采集完毕").format(sec_user_id))
                 break
 
-            logger.info(
-                _("当前请求的offset：{0} max_time：{1}").format(offset, max_time)
-            )
+            logger.info(_("当前请求的offset：{0} max_time：{1}").format(offset, max_time))
             logger.info(_("爬取了 {0} 个粉丝用户").format(users_collected + 1))
             logger.debug(
                 _("用户ID：{0} 用户昵称：{1} 用户作品数：{2}").format(
@@ -1590,7 +1421,7 @@ class DouyinHandler:
             logger.debug("===================================")
             logger.info(_("用户信息查询结束"))
         else:
-            logger.warning(_("请提供正确的ttwid")),
+            (logger.warning(_("请提供正确的ttwid")),)
 
         return user
 
@@ -1617,11 +1448,7 @@ class DouyinHandler:
             live_im = LiveImFetchFilter(response)
 
         if live_im.status_code == 0:
-            logger.debug(
-                _("直播间Room_ID：{0} 弹幕cursor：{1}").format(
-                    live_im.room_id, live_im.cursor
-                )
-            )
+            logger.debug(_("直播间Room_ID：{0} 弹幕cursor：{1}").format(live_im.room_id, live_im.cursor))
             logger.debug("===================================")
             logger.info(_("直播间信息查询结束"))
         else:
@@ -1629,9 +1456,7 @@ class DouyinHandler:
 
         return live_im
 
-    async def fetch_live_danmaku(
-        self, room_id: str, user_unique_id: str, internal_ext: str, cursor: str
-    ):
+    async def fetch_live_danmaku(self, room_id: str, user_unique_id: str, internal_ext: str, cursor: str):
         """
         通过WebSocket连接获取直播间弹幕，再通过回调函数处理弹幕数据。
 
@@ -1664,9 +1489,7 @@ class DouyinHandler:
             # TODO: WebcastRoomStreamAdaptationMessage
         }
         async with DouyinWebSocketCrawler(self.kwargs, callbacks=wss_callbacks) as wss:
-            signature = DouyinWebcastSignature(
-                ClientConfManager.user_agent()
-            ).get_signature(room_id, user_unique_id)
+            signature = DouyinWebcastSignature(ClientConfManager.user_agent()).get_signature(room_id, user_unique_id)
 
             params = LiveWebcast(
                 room_id=room_id,
@@ -1712,9 +1535,7 @@ class DouyinHandler:
             logger.debug("===================================")
             logger.info(_("关注用户直播间信息查询结束"))
         else:
-            logger.warning(
-                _("获取关注用户直播间信息失败：{0}").format(follow_live.status_msg)
-            )
+            logger.warning(_("获取关注用户直播间信息失败：{0}").format(follow_live.status_msg))
 
         return follow_live
 
