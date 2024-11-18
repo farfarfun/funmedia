@@ -10,8 +10,8 @@ from httpx import RequestError
 from httpx import TimeoutException
 from httpx import get
 
-from src.custom import BLANK_PREVIEW
-from src.custom import (
+from funmedia.custom import BLANK_PREVIEW
+from funmedia.custom import (
     DATA_HEADERS,
     DOWNLOAD_HEADERS,
     PROJECT_ROOT,
@@ -22,30 +22,30 @@ from src.custom import (
     DATA_HEADERS_TIKTOK,
     USERAGENT,
 )
-from src.encrypt import ABogus
-from src.encrypt import MsToken
-from src.encrypt import MsTokenTikTok
+from funmedia.encrypt import ABogus
+from funmedia.encrypt import MsToken
+from funmedia.encrypt import MsTokenTikTok
 
-# from src.encrypt import RABogus
-from src.encrypt import TtWid
-from src.encrypt import TtWidTikTok
-from src.encrypt import XBogus
-from src.extract import Extractor
-from src.interface import API
-from src.interface import APITikTok
-from src.module import FFMPEG
-from src.record import BaseLogger
-from src.record import LoggerManager
-from src.storage import RecordManager
-from src.tools import Cleaner
-from src.tools import cookie_dict_to_str
-from src.tools import create_client
+# from funmedia.encrypt import RABogus
+from funmedia.encrypt import TtWid
+from funmedia.encrypt import TtWidTikTok
+from funmedia.encrypt import XBogus
+from funmedia.extract import Extractor
+from funmedia.interface import API
+from funmedia.interface import APITikTok
+from funmedia.module import FFMPEG
+from funmedia.record import BaseLogger
+from funmedia.record import LoggerManager
+from funmedia.storage import RecordManager
+from funmedia.tools import Cleaner
+from funmedia.tools import cookie_dict_to_str
+from funmedia.tools import create_client
 
 if TYPE_CHECKING:
-    from src.manager import DownloadRecorder
-    from src.tools import ColorfulConsole
+    from funmedia.manager import DownloadRecorder
+    from funmedia.tools import ColorfulConsole
     from .settings import Settings
-    from src.module import Cookie
+    from funmedia.module import Cookie
 
 __all__ = ["Parameter"]
 

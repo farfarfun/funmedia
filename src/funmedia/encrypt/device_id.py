@@ -3,13 +3,13 @@ from re import compile
 from typing import TYPE_CHECKING
 from typing import Union
 
-from src.custom import PARAMS_HEADERS_TIKTOK
-from src.tools import request_params
+from funmedia.custom import PARAMS_HEADERS_TIKTOK
+from funmedia.tools import request_params
 
 if TYPE_CHECKING:
-    from src.record import BaseLogger
-    from src.record import LoggerManager
-    from src.testers import Logger
+    from funmedia.record import BaseLogger
+    from funmedia.record import LoggerManager
+    from funmedia.testers import Logger
 
 
 class DeviceId:
@@ -56,7 +56,7 @@ class DeviceId:
 
 
 async def demo():
-    from src.testers import Logger
+    from funmedia.testers import Logger
 
     print(
         await DeviceId.get_device_id(

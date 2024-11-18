@@ -1,11 +1,11 @@
 from typing import TYPE_CHECKING
 from typing import Union
 
-from src.interface.template import API
-from src.testers import Params
+from funmedia.interface.template import API
+from funmedia.testers import Params
 
 if TYPE_CHECKING:
-    from src.config import Parameter
+    from funmedia.config import Parameter
 
 
 class User(API):
