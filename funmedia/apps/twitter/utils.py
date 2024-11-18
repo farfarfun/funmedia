@@ -1,6 +1,6 @@
 # path: f2/apps/twitter/utils.py
 
-import f2
+import funmedia
 import re
 import httpx
 import asyncio

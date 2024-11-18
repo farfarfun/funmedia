@@ -1,6 +1,6 @@
 # path: f2/utils/utils.py
 
-import f2
+import funmedia
 import re
 import sys
 import httpx

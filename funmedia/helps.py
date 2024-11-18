@@ -15,7 +15,7 @@ Change Log  :
 -------------------------------------------------
 """
 
-import f2
+import funmedia
 import importlib
 
 from rich.console import Console

@@ -1,6 +1,6 @@
 # path: f2/cli/cli_command.py
 
-import f2
+import funmedia
 import click
 import typing
 import asyncio

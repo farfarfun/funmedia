@@ -1,6 +1,6 @@
 # path: f2/utils/conf_manager.py
 
-import f2
+import funmedia
 import yaml
 import click
 

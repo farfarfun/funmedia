@@ -1,6 +1,6 @@
 # path: f2/apps/tiktok/utils.py
 
-import f2
+import funmedia
 import re
 import json
 import httpx

@@ -1,6 +1,6 @@
 # path: f2/apps/twitter/cli.py
 
-import f2
+import funmedia
 import click
 import typing
 
