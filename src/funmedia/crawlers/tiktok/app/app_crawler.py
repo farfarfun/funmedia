@@ -47,9 +47,7 @@ from funmedia.crawlers.utils.utils import model_to_query_string
 from tenacity import *
 
 # TikTok接口数据请求模型
-from funmedia.crawlers.tiktok.app.models import (
-    BaseRequestModel, FeedVideoDetail
-)
+from funmedia.crawlers.tiktok.app.models import BaseRequestModel, FeedVideoDetail
 
 # 标记已废弃的方法
 from funmedia.crawlers.utils.deprecated import deprecated
@@ -63,7 +61,6 @@ with open(f"{path}/config.yaml", "r", encoding="utf-8") as f:
 
 
 class TikTokAPPCrawler:
-
     # 从配置文件中获取TikTok的请求头
     async def get_tiktok_headers(self):
         tiktok_config = config["TokenManager"]["tiktok"]
@@ -74,8 +71,10 @@ class TikTokAPPCrawler:
                 "Cookie": tiktok_config["headers"]["Cookie"],
                 "x-ladon": "Hello From Evil0ctal!",
             },
-            "proxies": {"http://": tiktok_config["proxies"]["http"],
-                        "https://": tiktok_config["proxies"]["https"]}
+            "proxies": {
+                "http://": tiktok_config["proxies"]["http"],
+                "https://": tiktok_config["proxies"]["https"],
+            },
         }
         return kwargs
 
@@ -91,7 +90,9 @@ class TikTokAPPCrawler:
         param_str = model_to_query_string(params)
         url = f"{TikTokAPIEndpoints.HOME_FEED}?{param_str}"
         # 创建一个基础爬虫
-        base_crawler = BaseCrawler(proxies=kwargs["proxies"], crawler_headers=kwargs["headers"])
+        base_crawler = BaseCrawler(
+            proxies=kwargs["proxies"], crawler_headers=kwargs["headers"]
+        )
         async with base_crawler as crawler:
             response = await crawler.fetch_get_json(url)
             response = response.get("aweme_list")[0]

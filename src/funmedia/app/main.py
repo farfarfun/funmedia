@@ -51,13 +51,13 @@ import yaml
 # Load Config
 
 # 读取上级再上级目录的配置文件
-config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config.yaml')
-with open(config_path, 'r', encoding='utf-8') as file:
+config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.yaml")
+with open(config_path, "r", encoding="utf-8") as file:
     config = yaml.safe_load(file)
 
 
-Host_IP = config['API']['Host_IP']
-Host_Port = config['API']['Host_Port']
+Host_IP = config["API"]["Host_IP"]
+Host_Port = config["API"]["Host_Port"]
 
 # API Tags
 tags_metadata = [
@@ -91,9 +91,9 @@ tags_metadata = [
     },
 ]
 
-version = config['API']['Version']
-update_time = config['API']['Update_Time']
-environment = config['API']['Environment']
+version = config["API"]["Version"]
+update_time = config["API"]["Update_Time"]
+environment = config["API"]["Environment"]
 
 description = f"""
 ### [中文]
@@ -123,8 +123,8 @@ description = f"""
 - If you need a more stable and feature-rich API service, you can use the paid API service: [TikHub API](https://api.tikhub.io)
 """
 
-docs_url = config['API']['Docs_URL']
-redoc_url = config['API']['Redoc_URL']
+docs_url = config["API"]["Docs_URL"]
+redoc_url = config["API"]["Redoc_URL"]
 
 app = FastAPI(
     title="Douyin TikTok Download API",
@@ -139,9 +139,9 @@ app = FastAPI(
 app.include_router(api_router, prefix="/api")
 
 # PyWebIO APP
-if config['Web']['PyWebIO_Enable']:
+if config["Web"]["PyWebIO_Enable"]:
     webapp = asgi_app(lambda: MainView().main_view())
     app.mount("/", webapp)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     uvicorn.run(app, host=Host_IP, port=Host_Port)
