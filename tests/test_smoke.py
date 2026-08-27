@@ -4,35 +4,35 @@ Lightweight smoke tests for the ``funmedia`` package.
 Scope / rationale
 ------------------
 ``funmedia`` (PyPI: funmedia) is a renamed fork of the open-source ``f2``
-project. It declares 10 platforms in ``funmedia/apps/__apps__.py`` but only
-FOUR of them actually have an implementation directory under
-``funmedia/apps/``: **douyin, tiktok, twitter, weibo**. The other six
-(youtube, instagram, bilibili, twitch, neteasy_music, little_red_book) have
-no code at all, so they are intentionally NOT covered here.
+project.
 
-While building this suite we discovered a real, reproducible, pre-existing
-bug caused by the incomplete f2 -> funmedia rename (the package still has
-``# path: f2/...`` header comments everywhere): ``get_resource_path()`` in
-``funmedia/utils/utils.py`` does ``importlib_resources.files("f2")`` -- it
-still points at the *old* "f2" package name instead of "funmedia". Since
-"f2" is not a dependency of funmedia, this raises ``ModuleNotFoundError``
-the moment it's exercised. It is reached by:
+As of farfarfun/todo-list#155, ``get_resource_path()`` in
+``funmedia/utils/utils.py`` now does ``importlib_resources.files("funmedia")``
+instead of the stale pre-rename ``"f2"``, which previously raised
+``ModuleNotFoundError`` for every import path that touched it (i18n
+``_()``, every platform's ``ClientConfManager``, and hence
+``funmedia.cli.cli_commands`` / ``python -m funmedia`` entirely).
 
-* ``funmedia.i18n.translator`` (the ``_()`` gettext helper used almost
-  everywhere, including as a default argument at *import* time in
-  ``funmedia/cli/cli_commands.py``)
-* ``ClientConfManager`` in every platform's ``utils.py`` (evaluated at class
-  body / import time)
+``funmedia/apps/__apps__.py`` also declared 10 platforms but only FOUR ever
+had an implementation directory under ``funmedia/apps/``: **douyin, tiktok,
+twitter, weibo**. The other six (youtube, instagram, bilibili, twitch,
+neteasy_music, little_red_book) had no code at all and were silently
+unresolvable as CLI subcommands; per #155 they've been removed from
+``__apps__.py`` rather than left as dead declarations.
 
-As a result, importing any of ``<platform>.utils`` / ``.model`` (douyin,
-tiktok) / ``.crawler`` / ``.dl`` / ``.handler`` / ``.cli``, or
-``funmedia.cli.cli_commands`` (and hence ``python -m funmedia`` for *any*
-invocation, including ``--help``), currently fails for all four implemented
-platforms. This is a genuine business-logic/packaging bug, not a test
-problem -- per audit scope we do not fix it here. The affected checks are
-marked with ``pytest.mark.skip`` and a clear reason; ``test_known_bugs.py``-
-style test below pins down the exact root cause so it's easy to notice (and
-delete the skips) once someone fixes the "f2" -> "funmedia" typo upstream.
+Now that the f2-rename bug is fixed, a *separate*, previously-masked bug
+surfaced: ``funmedia/apps/tiktok/utils.py``'s ``DeviceIdManager`` class body
+evaluates ``TokenManager.gen_real_msToken()`` (a real network call) as a
+class attribute default at *import time*. In this sandboxed/offline test
+environment that raises ``APIResponseError`` the moment
+``funmedia.apps.tiktok.utils`` (and hence ``.dl``/``.cli``) is imported.
+This is a genuine, pre-existing design bug (network I/O at import time) --
+unrelated to the f2-rename issue #155 covers -- so it is documented and
+skipped rather than fixed here. Note ``DynamicGroup.get_command`` in
+``cli_commands.py`` catches ``ImportError``/``AttributeError`` around the
+per-platform dynamic import, so ``python -m funmedia --help`` and the
+overall CLI group still work; only the ``tiktok`` subcommand itself is
+unusable until that bug is fixed.
 
 Everything else below is a real, passing check: no network I/O is performed
 (any HTTP call would need a valid session/cookie against a live platform),
@@ -48,6 +48,10 @@ import sys
 import pytest
 
 IMPLEMENTED_PLATFORMS = ["douyin", "tiktok", "twitter", "weibo"]
+# tiktok has real code (it's an IMPLEMENTED_PLATFORM) but its utils module
+# currently fails to import in this environment -- see
+# TIKTOK_IMPORT_TIME_NETWORK_BUG_REASON below.
+WORKING_PLATFORMS = ["douyin", "twitter", "weibo"]
 UNIMPLEMENTED_PLATFORMS = [
     "youtube",
     "instagram",
@@ -57,15 +61,14 @@ UNIMPLEMENTED_PLATFORMS = [
     "little_red_book",
 ]
 
-F2_RENAME_BUG_REASON = (
-    "Known upstream bug (not fixed here, out of audit scope): "
-    "funmedia/utils/utils.py:get_resource_path() still does "
-    "importlib_resources.files('f2') -- a leftover from the pre-rename "
-    "'f2' project -- instead of 'funmedia'. Since 'f2' is not installed, "
-    "this raises ModuleNotFoundError as soon as funmedia.i18n.translator "
-    "or any platform's ClientConfManager is imported, which blocks "
-    "utils/model/crawler/dl/handler/cli for every implemented platform. "
-    "See test_known_bug_get_resource_path_uses_stale_f2_package_name."
+TIKTOK_IMPORT_TIME_NETWORK_BUG_REASON = (
+    "Known pre-existing bug (not fixed here, out of scope for #155 -- it's "
+    "unrelated to the f2-rename that issue covers): "
+    "funmedia/apps/tiktok/utils.py's DeviceIdManager class body evaluates "
+    "TokenManager.gen_real_msToken(), a real network call, as a class "
+    "attribute default at *import time*. This makes funmedia.apps.tiktok."
+    "utils (and hence .dl/.cli) fail to import without network access. "
+    "See test_known_bug_tiktok_utils_makes_network_call_at_import_time."
 )
 
 
@@ -97,7 +100,9 @@ def test_apps_declared_vs_implemented_matches_audit_finding():
         spec = importlib.util.find_spec(f"funmedia.apps.{platform}")
         assert spec is not None, f"{platform} should be importable"
 
+    # #155: unimplemented platforms are no longer declared in __apps__.py
     for platform in UNIMPLEMENTED_PLATFORMS:
+        assert platform not in declared
         spec = importlib.util.find_spec(f"funmedia.apps.{platform}")
         assert spec is None, f"{platform} was expected to be unimplemented"
 
@@ -208,6 +213,17 @@ def test_utils_ensure_path(tmp_path):
     assert str(result) == str(target)
 
 
+def test_get_resource_path_resolves_within_funmedia_package():
+    """#155: get_resource_path() used to do
+    importlib_resources.files("f2") -- the pre-rename package name -- and
+    raise ModuleNotFoundError unconditionally. It now resolves against the
+    real "funmedia" package."""
+    from funmedia.utils.utils import get_resource_path
+
+    path = get_resource_path("conf/conf.yaml")
+    assert path.is_file()
+
+
 def test_decorators_module_imports():
     import funmedia.utils.decorators  # noqa: F401
 
@@ -255,35 +271,25 @@ def test_platform_async_user_db_roundtrip(tmp_path, platform):
 
 
 # ---------------------------------------------------------------------------
-# Known bug: pre-rename "f2" resource path (documented, not fixed here)
+# Now-fixed by #155: utils / cli / downloader for the platforms whose only
+# blocker was the "f2" -> "funmedia" resource-path bug.
 # ---------------------------------------------------------------------------
 
 
-def test_known_bug_get_resource_path_uses_stale_f2_package_name():
-    """Pins down the exact root cause blocking downloader/crawler/handler/
-    cli construction below. If this test starts failing, the upstream bug
-    has likely been fixed and the skips further down should be revisited.
-    """
-    from funmedia.utils.utils import get_resource_path
-
-    with pytest.raises(ModuleNotFoundError, match="f2"):
-        get_resource_path("conf/conf.yaml")
-
-
-@pytest.mark.parametrize("platform", IMPLEMENTED_PLATFORMS)
-@pytest.mark.skip(reason=F2_RENAME_BUG_REASON)
+@pytest.mark.parametrize("platform", WORKING_PLATFORMS)
 def test_platform_utils_module_imports(platform):
     importlib.import_module(f"funmedia.apps.{platform}.utils")
 
 
-@pytest.mark.parametrize("platform", IMPLEMENTED_PLATFORMS)
-@pytest.mark.skip(reason=F2_RENAME_BUG_REASON)
-def test_platform_downloader_constructs_with_mocked_network(platform, monkeypatch):
-    """Would-be smoke test for the core public API: constructing
-    ``<Platform>Downloader``/``<Platform>Crawler`` with a fake cookie and
-    mocked httpx client, without making real requests. Currently blocked by
-    the f2-rename bug documented above, so it is skipped rather than faked.
-    """
+@pytest.mark.parametrize("platform", WORKING_PLATFORMS)
+def test_platform_cli_module_imports(platform):
+    importlib.import_module(f"funmedia.apps.{platform}.cli")
+
+
+@pytest.mark.parametrize("platform", WORKING_PLATFORMS)
+def test_platform_downloader_constructs_without_network(platform):
+    """Constructing ``<Platform>Downloader`` with a fake cookie, without
+    making real requests."""
     dl_module = importlib.import_module(f"funmedia.apps.{platform}.dl")
     downloader_cls = getattr(dl_module, f"{platform.capitalize()}Downloader")
     kwargs = {"cookie": "test=1", "headers": {}, "proxies": {"http://": None, "https://": None}}
@@ -291,18 +297,14 @@ def test_platform_downloader_constructs_with_mocked_network(platform, monkeypatc
     assert downloader is not None
 
 
-@pytest.mark.skip(reason=F2_RENAME_BUG_REASON)
 def test_cli_module_imports():
     import funmedia.cli.cli_commands  # noqa: F401
 
 
-@pytest.mark.skip(reason=F2_RENAME_BUG_REASON)
 def test_cli_help_exits_cleanly():
     """No [project.scripts] entry point is declared for funmedia, so there is
     no installed console script to invoke; this exercises the documented
-    ``python -m funmedia --help`` invocation instead. Skipped: blocked by the
-    f2-rename bug (funmedia/cli/cli_commands.py evaluates ``_("...")`` as a
-    click option default at import time).
+    ``python -m funmedia --help`` invocation instead.
     """
     import subprocess
 
@@ -313,3 +315,35 @@ def test_cli_help_exits_cleanly():
         timeout=30,
     )
     assert result.returncode == 0
+
+
+# ---------------------------------------------------------------------------
+# Known bug (separate from #155, not fixed here): tiktok makes a network
+# call at import time.
+# ---------------------------------------------------------------------------
+
+
+def test_known_bug_tiktok_utils_makes_network_call_at_import_time():
+    """Pins down a real, reproducible, pre-existing bug that #155's fix
+    incidentally unmasked: funmedia.apps.tiktok.utils.DeviceIdManager
+    evaluates a real network call (TokenManager.gen_real_msToken()) as a
+    class attribute default, at import time. Fails offline with
+    APIResponseError instead of ModuleNotFoundError('f2') like it used to.
+    """
+    for name in list(sys.modules):
+        if name.startswith("funmedia.apps.tiktok"):
+            del sys.modules[name]
+
+    from funmedia.exceptions.api_exceptions import APIResponseError
+
+    with pytest.raises(APIResponseError):
+        importlib.import_module("funmedia.apps.tiktok.utils")
+
+
+@pytest.mark.skip(reason=TIKTOK_IMPORT_TIME_NETWORK_BUG_REASON)
+def test_platform_downloader_constructs_without_network_tiktok():
+    dl_module = importlib.import_module("funmedia.apps.tiktok.dl")
+    downloader_cls = dl_module.TiktokDownloader
+    kwargs = {"cookie": "test=1", "headers": {}, "proxies": {"http://": None, "https://": None}}
+    downloader = downloader_cls(kwargs)
+    assert downloader is not None

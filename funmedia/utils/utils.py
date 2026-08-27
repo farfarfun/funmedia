@@ -192,7 +192,7 @@ def get_resource_path(filepath: str):
         filepath: str: 文件路径 (file path)
     """
 
-    return importlib_resources.files("f2") / filepath
+    return importlib_resources.files("funmedia") / filepath
 
 
 def replaceT(obj: Union[str, Any]) -> Union[str, Any]:
