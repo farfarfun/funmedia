@@ -1034,8 +1034,11 @@ class DeviceIdManager(BaseCrawler):
     类属性:
     - _DEVICE_ID_PARTTERN: 编译后的正则表达式，用于匹配设备 ID。
     - _DEVICE_ID_URL: 设备 ID 生成器的 URL。
-    - _DEVICE_ID_HEADERS: 设备 ID 生成器的请求头。
     - proxies: 从 ClientConfManager 获取的代理配置。
+
+    实例属性:
+    - _DEVICE_ID_HEADERS: 设备 ID 生成器的请求头，在 __init__ 中惰性计算
+      （包含一次真实的 msToken 请求），避免在模块 import 时发起网络请求。
 
     方法:
     - __init__: 初始化 DeviceIdManager 实例，并调用父类的初始化方法。
@@ -1076,14 +1079,17 @@ class DeviceIdManager(BaseCrawler):
     _DEVICE_ID_URL = "https://www.tiktok.com/"
     _DEVICE_ID_FULL_URL = "https://www.tiktok.com/explore"
 
-    _DEVICE_ID_HEADERS = {
-        "User-Agent": ClientConfManager.user_agent(),
-        "Cookie": f"msToken={TokenManager.gen_real_msToken()}",
-    }
     proxies = ClientConfManager.proxies()
 
     def __init__(self):
         super().__init__(proxies=self.proxies)
+        # 延迟计算，避免在模块 import 时就发起真实的 msToken 请求
+        # (Computed lazily so import time doesn't trigger a real msToken
+        # network request.)
+        self._DEVICE_ID_HEADERS = {
+            "User-Agent": ClientConfManager.user_agent(),
+            "Cookie": f"msToken={TokenManager.gen_real_msToken()}",
+        }
 
     @classmethod
     async def gen_device_id(cls, full_cookie: bool = False) -> dict:

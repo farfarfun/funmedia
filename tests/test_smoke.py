@@ -20,19 +20,21 @@ neteasy_music, little_red_book) had no code at all and were silently
 unresolvable as CLI subcommands; per #155 they've been removed from
 ``__apps__.py`` rather than left as dead declarations.
 
-Now that the f2-rename bug is fixed, a *separate*, previously-masked bug
-surfaced: ``funmedia/apps/tiktok/utils.py``'s ``DeviceIdManager`` class body
-evaluates ``TokenManager.gen_real_msToken()`` (a real network call) as a
-class attribute default at *import time*. In this sandboxed/offline test
-environment that raises ``APIResponseError`` the moment
-``funmedia.apps.tiktok.utils`` (and hence ``.dl``/``.cli``) is imported.
-This is a genuine, pre-existing design bug (network I/O at import time) --
-unrelated to the f2-rename issue #155 covers -- so it is documented and
-skipped rather than fixed here. Note ``DynamicGroup.get_command`` in
-``cli_commands.py`` catches ``ImportError``/``AttributeError`` around the
-per-platform dynamic import, so ``python -m funmedia --help`` and the
-overall CLI group still work; only the ``tiktok`` subcommand itself is
-unusable until that bug is fixed.
+Now that the f2-rename bug is fixed, a *separate*, previously-masked bug had
+surfaced (farfarfun/todo-list#280): ``funmedia/apps/tiktok/utils.py``'s
+``DeviceIdManager`` class body used to evaluate
+``TokenManager.gen_real_msToken()`` (a real network call) as a class
+attribute default at *import time*. In this sandboxed/offline test
+environment that raised ``APIResponseError`` the moment
+``funmedia.apps.tiktok.utils`` (and hence ``.dl``/``.cli``) was imported.
+This has now been fixed: ``_DEVICE_ID_HEADERS`` is computed lazily in
+``DeviceIdManager.__init__`` instead of at class-definition time, so
+importing the module no longer makes any network call. Note
+``DynamicGroup.get_command`` in ``cli_commands.py`` catches
+``ImportError``/``AttributeError`` around the per-platform dynamic import,
+so ``python -m funmedia --help`` and the overall CLI group would have kept
+working regardless; only the ``tiktok`` subcommand itself was unusable
+before this fix.
 
 Everything else below is a real, passing check: no network I/O is performed
 (any HTTP call would need a valid session/cookie against a live platform),
@@ -48,10 +50,11 @@ import sys
 import pytest
 
 IMPLEMENTED_PLATFORMS = ["douyin", "tiktok", "twitter", "weibo"]
-# tiktok has real code (it's an IMPLEMENTED_PLATFORM) but its utils module
-# currently fails to import in this environment -- see
-# TIKTOK_IMPORT_TIME_NETWORK_BUG_REASON below.
-WORKING_PLATFORMS = ["douyin", "twitter", "weibo"]
+# farfarfun/todo-list#280: tiktok's utils module used to fail to import
+# offline (real network call at import time). Now that DeviceIdManager
+# computes its msToken headers lazily, tiktok imports cleanly like the
+# other implemented platforms.
+WORKING_PLATFORMS = ["douyin", "tiktok", "twitter", "weibo"]
 UNIMPLEMENTED_PLATFORMS = [
     "youtube",
     "instagram",
@@ -60,16 +63,6 @@ UNIMPLEMENTED_PLATFORMS = [
     "neteasy_music",
     "little_red_book",
 ]
-
-TIKTOK_IMPORT_TIME_NETWORK_BUG_REASON = (
-    "Known pre-existing bug (not fixed here, out of scope for #155 -- it's "
-    "unrelated to the f2-rename that issue covers): "
-    "funmedia/apps/tiktok/utils.py's DeviceIdManager class body evaluates "
-    "TokenManager.gen_real_msToken(), a real network call, as a class "
-    "attribute default at *import time*. This makes funmedia.apps.tiktok."
-    "utils (and hence .dl/.cli) fail to import without network access. "
-    "See test_known_bug_tiktok_utils_makes_network_call_at_import_time."
-)
 
 
 # ---------------------------------------------------------------------------
@@ -318,29 +311,29 @@ def test_cli_help_exits_cleanly():
 
 
 # ---------------------------------------------------------------------------
-# Known bug (separate from #155, not fixed here): tiktok makes a network
-# call at import time.
+# Fixed by farfarfun/todo-list#280: tiktok no longer makes a network call at
+# import time.
 # ---------------------------------------------------------------------------
 
 
-def test_known_bug_tiktok_utils_makes_network_call_at_import_time():
-    """Pins down a real, reproducible, pre-existing bug that #155's fix
-    incidentally unmasked: funmedia.apps.tiktok.utils.DeviceIdManager
-    evaluates a real network call (TokenManager.gen_real_msToken()) as a
-    class attribute default, at import time. Fails offline with
-    APIResponseError instead of ModuleNotFoundError('f2') like it used to.
+def test_tiktok_utils_imports_without_network_call_at_import_time():
+    """Regression test for farfarfun/todo-list#280:
+    funmedia.apps.tiktok.utils.DeviceIdManager used to evaluate a real
+    network call (TokenManager.gen_real_msToken()) as a class attribute
+    default, at import time, which raised APIResponseError offline. The
+    headers are now computed lazily in DeviceIdManager.__init__, so import
+    succeeds without touching the network, and the class no longer carries
+    a precomputed _DEVICE_ID_HEADERS class attribute.
     """
     for name in list(sys.modules):
         if name.startswith("funmedia.apps.tiktok"):
             del sys.modules[name]
 
-    from funmedia.exceptions.api_exceptions import APIResponseError
+    module = importlib.import_module("funmedia.apps.tiktok.utils")
 
-    with pytest.raises(APIResponseError):
-        importlib.import_module("funmedia.apps.tiktok.utils")
+    assert "_DEVICE_ID_HEADERS" not in module.DeviceIdManager.__dict__
 
 
-@pytest.mark.skip(reason=TIKTOK_IMPORT_TIME_NETWORK_BUG_REASON)
 def test_platform_downloader_constructs_without_network_tiktok():
     dl_module = importlib.import_module("funmedia.apps.tiktok.dl")
     downloader_cls = dl_module.TiktokDownloader
