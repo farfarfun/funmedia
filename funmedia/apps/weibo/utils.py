@@ -376,32 +376,6 @@ def format_file_name(
         raise KeyError(_("文件名模板字段 {0} 不存在，请检查".format(e)))
 
 
-def create_or_rename_user_folder(
-    kwargs: dict, local_user_data: dict, current_nickname: str
-) -> Path:
-    """
-    创建或重命名用户目录 (Create or rename user directory)
-
-    Args:
-        kwargs (dict): 配置参数 (Conf parameters)
-        local_user_data (dict): 本地用户数据 (Local user data)
-        current_nickname (str): 当前用户昵称 (Current user nickname)
-
-    Returns:
-        user_path (Path): 用户目录路径 (User directory path)
-    """
-    user_path = create_user_folder(kwargs, current_nickname)
-
-    if not local_user_data:
-        return user_path
-
-    if local_user_data.get("nickname") != current_nickname:
-        # 昵称不一致，触发目录更新操作
-        user_path = rename_user_folder(user_path, current_nickname)
-
-    return user_path
-
-
 def create_user_folder(kwargs: dict, nickname: Union[str, int]) -> Path:
     """
     根据提供的配置文件和昵称，创建对应的保存目录。
