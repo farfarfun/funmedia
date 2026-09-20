@@ -1,0 +1,37 @@
+# 测试配置模板：以下 cookie/msToken 等字段均为占位符，运行前请替换为你自己账号的凭证。
+# 严禁将真实的 cookie/token 提交到版本库。
+douyin:
+  headers:
+    User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0
+    Referer: https://www.douyin.com/
+  cookie: "your_douyin_cookie_here"
+  proxies:
+    http://:
+    https://:
+
+tiktok:
+  headers:
+    User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36
+    Referer: https://www.tiktok.com/
+  cookie: "your_tiktok_cookie_here"
+  proxies:
+    http://:
+    https://:
+
+weibo:
+  headers:
+    User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0
+    Referer: https://www.weibo.com/
+  cookie: "your_weibo_cookie_here"
+  proxies:
+    http://:
+    https://:
+
+twitter:
+  headers:
+    User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0
+    Referer: https://twitter.com/
+  cookie: "your_twitter_cookie_here"
+  proxies:
+    http://:
+    https://:
