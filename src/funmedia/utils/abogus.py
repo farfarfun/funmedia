@@ -21,7 +21,7 @@ import time
 import random
 
 from gmssl import sm3, func
-from typing import Union, Callable, List, Dict
+from typing import Union, Callable
 
 
 class StringProcessor:
@@ -34,13 +34,13 @@ class StringProcessor:
         to_ord_str(s: str) -> str:
             将字符串转换为 ASCII 码字符串。
 
-        to_ord_array(s: str) -> List[int]:
+        to_ord_array(s: str) -> list[int]:
             将字符串转换为 ASCII 码列表。
 
         to_char_str(s: str) -> str:
             将 ASCII 码列表转换为字符串。
 
-        to_char_array(s: str) -> List[int]:
+        to_char_array(s: str) -> list[int]:
             将字符串转换为 ASCII 码列表。
 
         js_shift_right(val: int, n: int) -> int:
@@ -89,7 +89,7 @@ class StringProcessor:
         return "".join([chr(i) for i in s])
 
     @staticmethod
-    def to_ord_array(s: str) -> List[int]:
+    def to_ord_array(s: str) -> list[int]:
         """
         将字符串转换为 ASCII 码列表 (Convert a string to a list of ASCII codes).
 
@@ -97,7 +97,7 @@ class StringProcessor:
             s (str): 输入字符串 (Input string).
 
         Returns:
-            List[int]: 转换后的 ASCII 码列表 (Converted list of ASCII codes).
+            list[int]: 转换后的 ASCII 码列表 (Converted list of ASCII codes).
         """
         return [ord(char) for char in s]
 
@@ -115,7 +115,7 @@ class StringProcessor:
         return "".join([chr(i) for i in s])
 
     @staticmethod
-    def to_char_array(s: str) -> List[int]:
+    def to_char_array(s: str) -> list[int]:
         """
         将字符串转换为 ASCII 码列表 (Convert a string to a list of ASCII codes).
 
@@ -123,7 +123,7 @@ class StringProcessor:
             s (str): 输入字符串 (Input string).
 
         Returns:
-            List[int]: 转换后的 ASCII 码列表 (Converted list of ASCII codes).
+            list[int]: 转换后的 ASCII 码列表 (Converted list of ASCII codes).
         """
         return [ord(char) for char in s]
 
@@ -153,7 +153,7 @@ class StringProcessor:
             str: 生成的伪随机字节字符串 (Generated pseudo-random byte string).
         """
 
-        def generate_byte_sequence() -> List[str]:
+        def generate_byte_sequence() -> list[str]:
             _rd = int(random.random() * 10000)
             return [
                 chr(((_rd & 255) & 170) | 1),
@@ -174,14 +174,14 @@ class CryptoUtility:
     CryptoUtility 类用于提供加密和编码的工具方法，包括 SM3 哈希、添加盐值、Base64 编码和 RC4 加密等。
     """
 
-    def __init__(self, salt: str, custom_base64_alphabet: List[str]):
+    def __init__(self, salt: str, custom_base64_alphabet: list[str]):
         """
         初始化 CryptoUtility 类
         Initialize the CryptoUtility class.
 
         Args:
             salt (str): 加密盐值 (Encryption salt).
-            custom_base64_alphabet (List[str]): 自定义 Base64 字符表 (Custom Base64 alphabet).
+            custom_base64_alphabet (list[str]): 自定义 Base64 字符表 (Custom Base64 alphabet).
         """
         self.salt = salt
         self.base64_alphabet = custom_base64_alphabet
@@ -205,21 +205,21 @@ class CryptoUtility:
         # fmt: on
 
     @staticmethod
-    def sm3_to_array(input_data: Union[str, List[int]]) -> List[int]:
+    def sm3_to_array(input_data: Union[str, list[int]]) -> list[int]:
         """
         计算请求体的 SM3 哈希值，并将结果转换为整数数组 (Calculate the SM3 hash value of the request body and convert the result to an array of integers).
 
         Args:
-            input_data (Union[str, List[int]]): 输入数据 (Input data).
+            input_data (Union[str, list[int]]): 输入数据 (Input data).
 
         Returns:
-            List[int]: 哈希值的整数数组 (Array of integers representing the hash value).
+            list[int]: 哈希值的整数数组 (Array of integers representing the hash value).
         """
         # 如果输入是字符串，则将其编码为字节数组
         if isinstance(input_data, str):
             input_data_bytes = input_data.encode("utf-8")
         else:
-            input_data_bytes = bytes(input_data)  # 将 List[int] 转换为字节数组
+            input_data_bytes = bytes(input_data)  # 将 list[int] 转换为字节数组
 
         # 将字节数组转换为适合 sm3.sm3_hash 函数处理的列表格式
         hex_result = sm3.sm3_hash(func.bytes_to_list(input_data_bytes))
@@ -240,44 +240,44 @@ class CryptoUtility:
         return param + self.salt
 
     def process_param(
-        self, param: Union[str, List[int]], add_salt: bool
-    ) -> Union[str, List[int]]:
+        self, param: Union[str, list[int]], add_salt: bool
+    ) -> Union[str, list[int]]:
         """
         处理输入参数，根据需要添加盐值 (Process input parameter and add salt if needed).
 
         Args:
-            param (Union[str, List[int]]): 输入参数 (Input parameter).
+            param (Union[str, list[int]]): 输入参数 (Input parameter).
             add_salt (bool): 是否添加盐值 (Whether to add salt).
 
         Returns:
-            Union[str, List[int]]: 处理后的参数 (Processed parameter).
+            Union[str, list[int]]: 处理后的参数 (Processed parameter).
         """
         if isinstance(param, str) and add_salt:
             param = self.add_salt(param)
         return param
 
     def params_to_array(
-        self, param: Union[str, List[int]], add_salt: bool = True
-    ) -> List[int]:
+        self, param: Union[str, list[int]], add_salt: bool = True
+    ) -> list[int]:
         """
         获取输入参数的哈希数组 (Get the hash array of the input parameter).
 
         Args:
-            param (Union[str, List[int]]): 输入参数 (Input parameter).
+            param (Union[str, list[int]]): 输入参数 (Input parameter).
             add_salt (bool): 是否添加盐值 (Whether to add salt).
 
         Returns:
-            List[int]: 哈希数组 (Hash array).
+            list[int]: 哈希数组 (Hash array).
         """
         processed_param = self.process_param(param, add_salt)
         return self.sm3_to_array(processed_param)
 
-    def transform_bytes(self, bytes_list: List[int]) -> str:
+    def transform_bytes(self, bytes_list: list[int]) -> str:
         """
         对输入的字节列表进行加密/解密操作，返回处理后的字符串 (Encrypt/decrypt the input byte list and return the processed string).
 
         Args:
-            bytes_list (List[int]): 输入的字节列表 (Input byte list).
+            bytes_list (list[int]): 输入的字节列表 (Input byte list).
 
         Returns:
             str: 处理后的字符串 (Processed string).
@@ -422,7 +422,7 @@ class BrowserFingerprintGenerator:
     BrowserFingerprintGenerator 用于生成模拟的浏览器指纹信息，用于在不同浏览器环境中进行测试和数据采集。
 
     类属性:
-        browsers (Dict[str, Callable[[], str]]): 浏览器类型和生成浏览器指纹的映射关系。
+        browsers (dict[str, Callable[[], str]]): 浏览器类型和生成浏览器指纹的映射关系。
 
     方法:
         generate_fingerprint(browser_type="Edge"):
@@ -459,7 +459,7 @@ class BrowserFingerprintGenerator:
         Returns:
             str: 生成的浏览器指纹字符串 (Generated browser fingerprint string).
         """
-        cls.browsers: Dict[str, Callable[[], str]] = {
+        cls.browsers: dict[str, Callable[[], str]] = {
             "Chrome": cls.generate_chrome_fingerprint,
             "Firefox": cls.generate_firefox_fingerprint,
             "Safari": cls.generate_safari_fingerprint,
@@ -516,22 +516,22 @@ class ABogus:
     ABogus 类用于生成 ABogus 参数。
 
     类属性:
-        array1 (List[int]): 加密请求体 (Encrypted request body).
-        array2 (List[int]): 加密请求头 (Encrypted request header).
-        array3 (List[int]): 加密 UA (Encrypted User-Agent).
+        array1 (list[int]): 加密请求体 (Encrypted request body).
+        array2 (list[int]): 加密请求头 (Encrypted request header).
+        array3 (list[int]): 加密 UA (Encrypted User-Agent).
         aid (int): AID 值 (AID value).
         pageId (int): 页面 ID (Page ID).
         salt (str): 加密盐值 (Encryption salt).
-        options (List[int]): 请求选项 (Request options).
+        options (list[int]): 请求选项 (Request options).
         ua_key (bytes): UA 加密密钥 (UA encryption key).
         character (str): 自定义 Base64 字符表 (Custom Base64 alphabet).
         character2 (str): 自定义 Base64 字符表 (Custom Base64 alphabet).
-        character_list (List[str]): 自定义 Base64 字符表列表 (List of custom Base64 alphabets).
+        character_list (list[str]): 自定义 Base64 字符表列表 (List of custom Base64 alphabets).
         crypto_utility (CryptoUtility): 加密工具类 (Encryption utility).
         user_agent (str): 自定义 UA (Custom User-Agent).
         browser_fp (str): 浏览器指纹 (Browser fingerprint).
-        sort_index (List[int]): 排序索引 (Sort index).
-        sort_index_2 (List[int]): 排序索引 (Sort index).
+        sort_index (list[int]): 排序索引 (Sort index).
+        sort_index_2 (list[int]): 排序索引 (Sort index).
 
     方法:
         encode_data(data: str, alphabet_index: int = 0) -> str:

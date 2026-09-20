@@ -393,7 +393,7 @@ def unescape_json(json_text: str) -> dict:
 
         json_obj = json.loads(json_text)
     except Exception as e:
-        print(f"`unescape_json` error: {e}, raw_json: {json_text}")
+        logger.warning(f"`unescape_json` 解析失败: {e}")
         json_obj = {}
 
     return json_obj

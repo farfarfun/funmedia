@@ -1,6 +1,6 @@
 import asyncio
 from pathlib import Path
-from typing import Any, AsyncGenerator, List, Union
+from typing import Any, AsyncGenerator, Union
 
 from funmedia.cli.cli_console import RichConsoleManager
 from funmedia.exceptions.api_exceptions import APIResponseError
@@ -681,7 +681,7 @@ class DouyinHandler:
 
     async def select_user_collects(
         self, collects: UserCollectsFilter
-    ) -> Union[str, List[str]]:
+    ) -> Union[str, list[str]]:
         """
         用于选择收藏夹
         (Used to select the collection)
@@ -690,7 +690,7 @@ class DouyinHandler:
             collects: UserCollectsFilter: 收藏夹列表过滤器  (Collection list Filter)
 
         Return:
-            collects_id: Union[str, List[str]]: 选择的收藏夹ID (Selected collects_id)
+            collects_id: Union[str, list[str]]: 选择的收藏夹ID (Selected collects_id)
         """
 
         rich_console.print(_("0: [bold]全部下载[/bold]"))

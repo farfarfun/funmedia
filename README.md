@@ -44,3 +44,18 @@ profile = await handler.fetch_user_profile(sec_user_id="...")
 ```
 
 下载、过滤、数据模型分别在同目录下的 `dl.py`（`DouyinDownloader`）、`filter.py`、`model.py` 中实现，`crawler.py` 提供底层请求封装（`DouyinCrawler`/`DouyinWebSocketCrawler`）。
+
+## 第三方代码来源
+
+本项目基于开源项目 [f2](https://github.com/Johnserf-Seed/f2)（作者 JohnserfSeed，原始协议 Apache License 2.0）改名而来，大部分核心逻辑直接移植自 f2，源码中保留了原始的文件头注释与版权声明。其中签名算法实现 `funmedia/utils/abogus.py` 同样来自 f2，原始协议为 Apache License 2.0。
+
+## 关于 farfarfun
+
+[farfarfun](https://github.com/farfarfun) 是一个专注于实用工具库的开源组织，
+涵盖云存储、数据处理、AI、多媒体与开发工具链等方向。
+
+- 🏠 组织主页：<https://github.com/farfarfun>
+- 📦 PyPI：<https://pypi.org/user/niuliangtao/>
+- 📧 联系：farfarfun@qq.com
+
+本项目基于 [MIT](LICENSE) 协议开源。

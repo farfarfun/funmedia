@@ -4,6 +4,7 @@ import asyncio
 
 from funmedia.utils._singleton import Singleton
 from funmedia.cli.cli_console import RichConsoleManager
+from funmedia.log.logger import logger
 
 
 class SignalManager(metaclass=Singleton):
@@ -27,8 +28,8 @@ class SignalManager(metaclass=Singleton):
                 for task in asyncio.all_tasks(loop):
                     task.cancel()
                 loop.stop()
-            except Exception:
-                pass
+            except RuntimeError as e:
+                logger.warning(f"取消运行中任务失败: {e}")
 
         # 执行资源清理操作
         sys.exit(0)
