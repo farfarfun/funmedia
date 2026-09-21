@@ -5,6 +5,8 @@ from urllib.parse import quote
 
 from pydantic import BaseModel
 
+from funmedia.exceptions.api_exceptions import APIError
+from funmedia.log.logger import logger
 from .utils import ClientConfManager, TokenManager, VerifyFpManager
 
 
@@ -67,7 +69,11 @@ class BaseLiveModel2(BaseModel):
     sec_user_id: str = ""
     version_code: str = "99.99.99"
     app_id: str = "1128"
-    msToken: str = TokenManager.gen_real_msToken()
+    try:
+        msToken: str = TokenManager.gen_real_msToken()
+    except APIError as exc:
+        logger.warning(f"生成 msToken 失败，使用随机 token: {exc}")
+        msToken: str = TokenManager.gen_false_msToken()
 
 
 class BaseLoginModel(BaseModel):

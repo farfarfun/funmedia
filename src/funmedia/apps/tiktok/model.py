@@ -4,6 +4,7 @@ from typing import Any
 from pydantic import BaseModel
 from urllib.parse import quote, unquote
 
+from funmedia.exceptions.api_exceptions import APIError
 from funmedia.apps.tiktok.utils import TokenManager, ClientConfManager
 from funmedia.utils.utils import get_timestamp
 from funmedia.log.logger import logger
@@ -57,10 +58,9 @@ class BaseRequestModel(BaseModel):
     )
     try:
         msToken: str = TokenManager.gen_real_msToken()
-    except Exception as e:
-        logger.warning(f"生成 msToken 失败: {e}")
-        # 发生异常时，重新生成msToken，不生成虚假msToken
-        msToken: str = TokenManager.gen_real_msToken()
+    except APIError as e:
+        logger.warning(f"生成 msToken 失败，使用随机 token: {e}")
+        msToken: str = TokenManager.gen_false_msToken()
 
 
 # router model
