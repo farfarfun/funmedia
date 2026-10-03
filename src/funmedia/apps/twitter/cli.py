@@ -23,7 +23,7 @@ from funmedia.apps.twitter.utils import ClientConfManager
 
 def handler_help(
     ctx: click.Context,
-    param: typing.Union[click.Option, click.Parameter],
+    param: click.Option | click.Parameter,
     value: typing.Any,
 ) -> None:
     """
@@ -47,7 +47,7 @@ def handler_help(
 
 def handler_auto_cookie(
     ctx: click.Context,
-    param: typing.Union[click.Option, click.Parameter],
+    param: click.Option | click.Parameter,
     value: typing.Any,
 ) -> None:
     """
@@ -86,7 +86,7 @@ def handler_auto_cookie(
 
 def handler_language(
     ctx: click.Context,
-    param: typing.Union[click.Option, click.Parameter],
+    param: click.Option | click.Parameter,
     value: typing.Any,
 ) -> None:
     """
@@ -108,7 +108,7 @@ def handler_language(
 
 def handler_naming(
     ctx: click.Context,
-    param: typing.Union[click.Option, click.Parameter],
+    param: click.Option | click.Parameter,
     value: typing.Any,
 ) -> None:
     """
@@ -183,6 +183,7 @@ def handler_naming(
     "--cookie",
     "-k",
     type=str,
+    envvar="FUNMEDIA_TWITTER_COOKIE",
     help=_("登录后的[yellow]cookie[/yellow]"),
 )
 @click.option(

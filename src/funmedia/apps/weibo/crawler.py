@@ -2,6 +2,7 @@
 
 from funmedia.log.logger import logger
 from funmedia.i18n.translator import _
+from funmedia.utils.utils import mask_sensitive_url
 from funmedia.crawlers.base_crawler import BaseCrawler
 from funmedia.apps.weibo.api import WeiboAPIEndpoints as wbendpoint
 from funmedia.apps.weibo.model import (
@@ -27,26 +28,26 @@ class WeiboCrawler(BaseCrawler):
         endpoint = ModelManager.model_2_endpoint(
             wbendpoint.USER_INFO, params.model_dump()
         )
-        logger.debug(_("用户信息接口地址:" + endpoint))
+        logger.debug(_("用户信息接口地址:" + mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_user_detail(self, params: UserDetail):
         endpoint = ModelManager.model_2_endpoint(
             wbendpoint.USER_DETAIL, params.model_dump()
         )
-        logger.debug(_("用户详情接口地址:" + endpoint))
+        logger.debug(_("用户详情接口地址:" + mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_user_weibo(self, params: UserWeibo):
         endpoint = ModelManager.model_2_endpoint(
             wbendpoint.USER_WEIBO, params.model_dump()
         )
-        logger.debug(_("用户微博接口地址:" + endpoint))
+        logger.debug(_("用户微博接口地址:" + mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_weibo_detail(self, params: WeiboDetail):
         endpoint = ModelManager.model_2_endpoint(
             wbendpoint.WeiboDetail, params.model_dump()
         )
-        logger.debug(_("单条微博接口地址:" + endpoint))
+        logger.debug(_("单条微博接口地址:" + mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)

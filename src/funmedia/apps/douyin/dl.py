@@ -1,6 +1,6 @@
 import sys
 from datetime import datetime
-from typing import Any, Union
+from typing import Any
 
 from funmedia.dl.base_downloader import BaseDownloader
 from funmedia.i18n.translator import _
@@ -35,17 +35,17 @@ class DouyinDownloader(BaseDownloader):
             await db.update_user_info(sec_user_id=sec_user_id, last_aweme_id=aweme_id)
 
     async def filter_aweme_datas_by_interval(
-        self, aweme_datas: Union[list, dict], interval: str
-    ) -> Union[list[dict], dict, None]:
+        self, aweme_datas: list | dict, interval: str
+    ) -> list[dict] | dict | None:
         """
         筛选指定日期区间内的作品
 
         Args:
-            aweme_datas (Union[list, dict]): 作品数据列表
+            aweme_datas (list | dict): 作品数据列表
             interval (str): 日期区间，格式：2022-01-01|2023-01-01
 
         Returns:
-            filtered_aweme_datas (Union[list, dict]): 筛选后的作品数据列表
+            filtered_aweme_datas (list | dict): 筛选后的作品数据列表
         """
 
         if not aweme_datas or not interval:
@@ -95,7 +95,7 @@ class DouyinDownloader(BaseDownloader):
             return filtered_list
 
     async def create_download_tasks(
-        self, kwargs: dict, aweme_datas: Union[list, dict], user_path: Any
+        self, kwargs: dict, aweme_datas: list | dict, user_path: Any
     ) -> None:
         """
         创建下载任务
@@ -268,7 +268,7 @@ class DouyinDownloader(BaseDownloader):
         await self.save_last_aweme_id(sec_user_id, aweme_id)
 
     async def create_music_download_tasks(
-        self, kwargs: dict, music_datas: Union[list, dict], user_path: Any
+        self, kwargs: dict, music_datas: list | dict, user_path: Any
     ) -> None:
         """
         创建音乐下载任务
@@ -341,7 +341,7 @@ class DouyinDownloader(BaseDownloader):
             )
 
     async def create_stream_tasks(
-        self, kwargs: dict, webcast_datas: Union[list, dict], user_path: Any
+        self, kwargs: dict, webcast_datas: list | dict, user_path: Any
     ) -> None:
         """
         创建视频流下载任务

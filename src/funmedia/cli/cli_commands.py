@@ -25,7 +25,7 @@ from rich.console import Console
 # 处理帮助信息
 def handle_help(
     ctx: click.Context,
-    param: typing.Union[click.Option, click.Parameter],
+    param: click.Option | click.Parameter,
     value: typing.Any,
 ) -> None:
     if not value or ctx.resilient_parsing:
@@ -37,7 +37,7 @@ def handle_help(
 # 处理版本号
 def handle_version(
     ctx: click.Context,
-    param: typing.Union[click.Option, click.Parameter],
+    param: click.Option | click.Parameter,
     value: typing.Any,
 ) -> None:
     if not value or ctx.resilient_parsing:
@@ -50,7 +50,7 @@ def handle_version(
 # 处理debug
 def handle_debug(
     ctx: click.Context,
-    param: typing.Union[click.Option, click.Parameter],
+    param: click.Option | click.Parameter,
     value: typing.Any,
 ) -> None:
     if not value or ctx.resilient_parsing:
@@ -67,7 +67,7 @@ def handle_debug(
 # 版本检测
 def handle_last_version(
     ctx: click.Context,
-    param: typing.Union[click.Option, click.Parameter],
+    param: click.Option | click.Parameter,
     value: typing.Any,
 ) -> None:
     if not value or ctx.resilient_parsing:
@@ -78,16 +78,31 @@ def handle_last_version(
     ctx.exit()
 
 
-async def check_version():
-    """用于检查F2的版本是否最新"""
+def _parse_version(raw_version: str) -> tuple:
+    """
+    将形如 "1.2.12" 的版本号解析为可比较大小的整数元组，忽略非数字后缀
+    (Parse a dotted version string into a tuple of ints for ordering comparisons)
+    """
+    parts = []
+    for segment in raw_version.split("."):
+        digits = "".join(ch for ch in segment if ch.isdigit())
+        parts.append(int(digits) if digits else 0)
+    return tuple(parts)
 
-    latest_version = await get_latest_version("f2")
+
+async def check_version():
+    """用于检查 funmedia 的版本是否最新"""
+
+    # 本包发布名为 funmedia，不是上游的 f2
+    latest_version = await get_latest_version("funmedia")
 
     if latest_version:
-        if funmedia.__version__ > latest_version:
+        current = _parse_version(funmedia.__version__)
+        latest = _parse_version(latest_version)
+        if current < latest:
             message = (
-                f"您当前使用的版本 {funmedia.__version__} 可能已过时，请考虑及时升级到最新版本 {latest_version}，"
-                "使用 pip install -U f2 更新"
+                f"您当前使用的版本 {funmedia.__version__} 已过时，请考虑及时升级到最新版本 {latest_version}，"
+                "使用 pip install -U funmedia 更新"
             )
             Console().print(
                 Panel(
@@ -98,11 +113,24 @@ async def check_version():
                     border_style="red",
                 )
             )
-        elif funmedia.__version__ == latest_version:
+        elif current == latest:
             message = f"您当前使用的是最新版本：{funmedia.__version__}"
             Console().print(
                 Panel(
                     message, title="版本检查", style="bold green", border_style="green"
+                )
+            )
+        else:
+            message = (
+                f"您当前使用的版本 {funmedia.__version__} 领先于 PyPI 最新发布版本 "
+                f"{latest_version}，可能是未发布的开发版本"
+            )
+            Console().print(
+                Panel(
+                    message,
+                    title="版本检查",
+                    style="bold yellow",
+                    border_style="yellow",
                 )
             )
     else:

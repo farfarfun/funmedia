@@ -2,7 +2,7 @@
 
 import sys
 from datetime import datetime
-from typing import Any, Union
+from typing import Any
 
 from funmedia.i18n.translator import _
 from funmedia.log.logger import logger
@@ -24,7 +24,7 @@ class TwitterDownloader(BaseDownloader):
         super().__init__(kwargs)
 
     async def create_download_tasks(
-        self, kwargs: dict, tweet_datas: Union[list, dict], user_path: Any
+        self, kwargs: dict, tweet_datas: list | dict, user_path: Any
     ) -> None:
         """
         创建下载任务

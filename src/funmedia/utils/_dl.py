@@ -5,7 +5,6 @@ import httpx
 import traceback
 
 from pathlib import Path
-from typing import Union
 from funmedia.utils.utils import ensure_path
 from funmedia.log.logger import logger
 from funmedia.i18n.translator import _
@@ -53,11 +52,17 @@ async def get_content_length(url: str, headers: dict = ..., proxies: dict = ...)
 
         except httpx.ConnectTimeout:
             # 连接超时错误处理 (Handling connection timeout errors)
+            # 注意：不记录完整 headers/proxies，避免 Cookie、token 等敏感信息写入日志，
+            # 仅记录 header 的键名用于排查 (Only log header keys, never values, to avoid
+            # leaking Cookie/token into logs)
             logger.error(traceback.format_exc())
             logger.error(_("连接超时错误: {0}".format(url)))
-            logger.debug("===================================")
-            logger.debug(f"headers:{headers}, proxies:{proxies}")
-            logger.debug("===================================")
+            logger.debug(
+                "header_keys:{0}, proxy_enabled:{1}".format(
+                    list(headers.keys()) if headers else [],
+                    bool(proxies),
+                )
+            )
             return 0
         # 对HTTP状态错误进行处理 (Handling HTTP status errors)
         except httpx.HTTPStatusError as exc:
@@ -112,7 +117,7 @@ async def get_content_length(url: str, headers: dict = ..., proxies: dict = ...)
         # raise ValueError("响应中没有找到Content-Length") # Content-Length header not found in the response
 
 
-def trim_filename(filename: Union[str, Path], max_length: int = 50) -> str:
+def trim_filename(filename: str | Path, max_length: int = 50) -> str:
     """
     裁剪文件名以适应控制台显示 (Trim the filename to fit console display)
 
@@ -160,7 +165,7 @@ def get_chunk_size(file_size: int) -> int:
         return 1 * 1024 * 1024  # 使用1MB的块大小 (Use a chunk size of 1MB)
 
 
-async def get_segments_from_m3u8(url: str) -> Union[list, str, None]:
+async def get_segments_from_m3u8(url: str) -> list | str | None:
     """
     从给定的m3u8文件中获取segments
 
@@ -191,7 +196,7 @@ async def get_segments_from_m3u8(url: str) -> Union[list, str, None]:
     return segments
 
 
-async def get_segments_duration(url: str) -> Union[list, int, float, None]:
+async def get_segments_duration(url: str) -> list | int | float | None:
     """
     从给定的m3u8文件中获取segments的duration
 

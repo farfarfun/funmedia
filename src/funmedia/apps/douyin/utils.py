@@ -7,7 +7,6 @@ import re
 import time
 import traceback
 from pathlib import Path
-from typing import Union
 
 import funmedia
 import httpx
@@ -1356,14 +1355,14 @@ def format_file_name(
         raise KeyError(_("文件名模板字段 {0} 不存在，请检查").format(e))
 
 
-def create_user_folder(kwargs: dict, nickname: Union[str, int]) -> Path:
+def create_user_folder(kwargs: dict, nickname: str | int) -> Path:
     """
     根据提供的配置文件和昵称，创建对应的保存目录。
     (Create the corresponding save directory according to the provided conf file and nickname.)
 
     Args:
         kwargs (dict): 配置文件，字典格式。(Conf file, dict format)
-        nickname (Union[str, int]): 用户的昵称，允许字符串或整数。  (User nickname, allow strings or integers)
+        nickname (str | int): 用户的昵称，允许字符串或整数。  (User nickname, allow strings or integers)
 
     Note:
         如果未在配置文件中指定路径，则默认为 "Download"。
@@ -1465,13 +1464,13 @@ def show_qrcode(qrcode_url: str, show_image: bool = False) -> None:
         qr.print_ascii(invert=True)
 
 
-def json_2_lrc(data: Union[str, list, dict]) -> str:
+def json_2_lrc(data: str | list | dict) -> str:
     """
     从抖音原声json格式歌词生成lrc格式歌词
     (Generate lrc lyrics format from Douyin original json lyrics format)
 
     Args:
-        data (Union[str, list, dict]): 抖音原声json格式歌词 (Douyin original json lyrics format)
+        data (str | list | dict): 抖音原声json格式歌词 (Douyin original json lyrics format)
 
     Returns:
         str: 生成的lrc格式歌词 (Generated lrc format lyrics)

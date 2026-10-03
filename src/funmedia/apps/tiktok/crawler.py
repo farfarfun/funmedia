@@ -2,6 +2,7 @@
 
 from funmedia.log.logger import logger
 from funmedia.i18n.translator import _
+from funmedia.utils.utils import mask_sensitive_url
 from funmedia.crawlers.base_crawler import BaseCrawler
 from funmedia.apps.tiktok.api import TiktokAPIEndpoints as tkendpoint
 from funmedia.apps.tiktok.model import (
@@ -36,7 +37,7 @@ class TiktokCrawler(BaseCrawler):
             tkendpoint.USER_DETAIL,
             params.model_dump(),
         )
-        logger.debug(_("用户信息接口地址：{0}").format(endpoint))
+        logger.debug(_("用户信息接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_user_post(self, params: UserPost):
@@ -45,7 +46,7 @@ class TiktokCrawler(BaseCrawler):
             tkendpoint.USER_POST,
             params.model_dump(),
         )
-        logger.debug(_("主页作品接口地址：{0}").format(endpoint))
+        logger.debug(_("主页作品接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_user_like(self, params: UserLike):
@@ -54,7 +55,7 @@ class TiktokCrawler(BaseCrawler):
             tkendpoint.USER_LIKE,
             params.model_dump(),
         )
-        logger.debug(_("喜欢作品接口地址：{0}").format(endpoint))
+        logger.debug(_("喜欢作品接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_user_collect(self, params: UserCollect):
@@ -63,7 +64,7 @@ class TiktokCrawler(BaseCrawler):
             tkendpoint.USER_COLLECT,
             params.model_dump(),
         )
-        logger.debug(_("收藏作品接口地址：{0}").format(endpoint))
+        logger.debug(_("收藏作品接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_user_play_list(self, params: UserPlayList):
@@ -72,7 +73,7 @@ class TiktokCrawler(BaseCrawler):
             tkendpoint.USER_PLAY_LIST,
             params.model_dump(),
         )
-        logger.debug(_("合集列表接口地址：{0}").format(endpoint))
+        logger.debug(_("合集列表接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_user_mix(self, params: UserMix):
@@ -81,7 +82,7 @@ class TiktokCrawler(BaseCrawler):
             tkendpoint.USER_MIX,
             params.model_dump(),
         )
-        logger.debug(_("合集作品接口地址：{0}").format(endpoint))
+        logger.debug(_("合集作品接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_post_detail(self, params: PostDetail):
@@ -90,7 +91,7 @@ class TiktokCrawler(BaseCrawler):
             tkendpoint.AWEME_DETAIL,
             params.model_dump(),
         )
-        logger.debug(_("作品详情接口地址：{0}").format(endpoint))
+        logger.debug(_("作品详情接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_post_comment(self, params: PostComment):
@@ -99,7 +100,7 @@ class TiktokCrawler(BaseCrawler):
             tkendpoint.POST_COMMENT,
             params.model_dump(),
         )
-        logger.debug(_("作品评论接口地址：{0}").format(endpoint))
+        logger.debug(_("作品评论接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_post_recommend(self, params: PostDetail):
@@ -108,7 +109,7 @@ class TiktokCrawler(BaseCrawler):
             tkendpoint.HOME_RECOMMEND,
             params.model_dump(),
         )
-        logger.debug(_("首页推荐接口地址：{0}").format(endpoint))
+        logger.debug(_("首页推荐接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_post_search(self, params: PostSearch):
@@ -117,7 +118,7 @@ class TiktokCrawler(BaseCrawler):
             tkendpoint.POST_SEARCH,
             params.model_dump(),
         )
-        logger.debug(_("搜索作品接口地址：{0}").format(endpoint))
+        logger.debug(_("搜索作品接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_user_live(self, params: UserLive):
@@ -126,7 +127,7 @@ class TiktokCrawler(BaseCrawler):
             tkendpoint.USER_LIVE,
             params.model_dump(),
         )
-        logger.debug(_("用户直播接口地址：{0}").format(endpoint))
+        logger.debug(_("用户直播接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_check_live_alive(self, params: CheckLiveAlive):
@@ -135,7 +136,9 @@ class TiktokCrawler(BaseCrawler):
             tkendpoint.CHECK_LIVE_ALIVE,
             params.model_dump(),
         )
-        logger.debug(_("检查开播状态接口地址：{0}").format(endpoint))
+        logger.debug(
+            _("检查开播状态接口地址：{0}").format(mask_sensitive_url(endpoint))
+        )
         return await self._fetch_get_json(endpoint)
 
     async def __aenter__(self):

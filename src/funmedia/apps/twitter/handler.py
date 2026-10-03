@@ -2,7 +2,7 @@
 
 import asyncio
 from pathlib import Path
-from typing import AsyncGenerator, Union, Dict, Any, List
+from typing import AsyncGenerator, Any
 
 from funmedia.log.logger import logger
 from funmedia.i18n.translator import _

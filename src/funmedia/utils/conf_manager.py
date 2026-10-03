@@ -124,6 +124,17 @@ class ConfigManager:
 
         self.config[app_name] = app_config
 
+        if kwargs.get("cookie"):
+            # Cookie 等凭据会以明文形式写入本地配置文件，仅提醒用户，不阻断已有的
+            # “自动获取并记住 Cookie” 功能；更安全的方式是改用环境变量
+            # （如 FUNMEDIA_DOUYIN_COOKIE）传入，不落盘
+            logger.warning(
+                _(
+                    "Cookie 将以明文形式写入本地配置文件 {0}，"
+                    "注意该文件不要提交到版本库；也可改用环境变量传入 Cookie，避免持久化到磁盘"
+                ).format(self.filepath)
+            )
+
         # 在保存前询问用户确认 (Ask the user for confirmation before saving)
         if click.confirm(
             _("是否要使用命令行的参数更新配置文件？")

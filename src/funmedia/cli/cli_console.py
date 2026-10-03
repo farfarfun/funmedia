@@ -1,7 +1,6 @@
 # path: f2/cli/cli_console.py
 
 from asyncio import Lock
-from typing import Optional, Dict
 
 from rich.prompt import Prompt
 from rich.console import Console
@@ -40,7 +39,7 @@ class CustomSpinnerColumn(ProgressColumn):
 
     def __init__(
         self,
-        spinner_styles: Optional[Dict[str, str]] = None,
+        spinner_styles: dict[str, str] | None = None,
         style: str = "progress.spinner",
         speed: float = 1.0,
     ):
@@ -84,8 +83,8 @@ class ProgressManager:
     def __init__(
         self,
         spinner_column: CustomSpinnerColumn = None,
-        custom_columns: Optional[Dict[str, ProgressColumn]] = None,
-        bar_width: Optional[int] = None,
+        custom_columns: dict[str, ProgressColumn] | None = None,
+        bar_width: int | None = None,
         expand: bool = False,
     ):
         chosen_columns_dict = custom_columns or self.DEFAULT_COLUMNS.copy()
@@ -122,7 +121,7 @@ class ProgressManager:
         self,
         description: str,
         start: bool = True,
-        total: Optional[float] = None,
+        total: float | None = None,
         completed: int = 0,
         visible: bool = True,
         state: str = "starting",
@@ -144,14 +143,14 @@ class ProgressManager:
     async def update(
         self,
         task_id: TaskID,
-        total: Optional[float] = None,
-        completed: Optional[float] = None,
-        advance: Optional[float] = None,
-        description: Optional[str] = None,
+        total: float | None = None,
+        completed: float | None = None,
+        advance: float | None = None,
+        description: str | None = None,
         visible: bool = True,
         refresh: bool = False,
         filename=None,
-        state: Optional[str] = None,
+        state: str | None = None,
     ) -> None:
         async with self._progress_lock:
             update_params = {

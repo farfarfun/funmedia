@@ -1,13 +1,22 @@
 # path: f2/apps/tiktok/models.py
 
 from typing import Any
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from urllib.parse import quote, unquote
 
 from funmedia.exceptions.api_exceptions import APIError
 from funmedia.apps.tiktok.utils import TokenManager, ClientConfManager
 from funmedia.utils.utils import get_timestamp
 from funmedia.log.logger import logger
+
+
+def _gen_ms_token_default() -> str:
+    """生成 msToken 默认值，失败时降级为虚假 token，避免在模块导入时发起网络请求。"""
+    try:
+        return TokenManager.gen_real_msToken()
+    except APIError as exc:
+        logger.warning("生成 msToken 失败，使用随机 token：{0}", exc)
+        return TokenManager.gen_false_msToken()
 
 
 # Model
@@ -56,11 +65,7 @@ class BaseRequestModel(BaseModel):
     tz_name: str = quote(
         ClientConfManager.base_request_model().get("tz_name", "Asia/Hong_Kong"), safe=""
     )
-    try:
-        msToken: str = TokenManager.gen_real_msToken()
-    except APIError as e:
-        logger.warning(f"生成 msToken 失败，使用随机 token: {e}")
-        msToken: str = TokenManager.gen_false_msToken()
+    msToken: str = Field(default_factory=_gen_ms_token_default)
 
 
 # router model

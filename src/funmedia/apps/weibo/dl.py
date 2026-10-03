@@ -2,7 +2,7 @@
 
 import sys
 from datetime import datetime
-from typing import Any, Union
+from typing import Any
 
 from funmedia.log.logger import logger
 from funmedia.i18n.translator import _
@@ -27,7 +27,7 @@ class WeiboDownloader(BaseDownloader):
     async def create_download_tasks(
         self,
         kwargs: dict = ...,
-        weibo_datas: Union[list, dict] = ...,
+        weibo_datas: list | dict = ...,
         user_path: Any = ...,
     ) -> None:
         """

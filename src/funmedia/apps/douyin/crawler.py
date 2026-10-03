@@ -4,8 +4,9 @@ import traceback
 from funmedia.crawlers.base_crawler import BaseCrawler, WebSocketCrawler
 from funmedia.i18n.translator import _
 from funmedia.log.logger import logger
-from funmedia.utils.utils import BaseEndpointManager
+from funmedia.utils.utils import BaseEndpointManager, mask_sensitive_url
 from google.protobuf import json_format
+from google.protobuf.message import DecodeError
 
 from .api import DouyinAPIEndpoints as dyendpoint
 from .model import (
@@ -72,7 +73,7 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.USER_DETAIL,
             params.model_dump(),
         )
-        logger.debug(_("用户信息接口地址：{0}").format(endpoint))
+        logger.debug(_("用户信息接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_user_post(self, params: UserPost):
@@ -81,7 +82,7 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.USER_POST,
             params.model_dump(),
         )
-        logger.debug(_("主页作品接口地址：{0}").format(endpoint))
+        logger.debug(_("主页作品接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_user_like(self, params: UserLike):
@@ -90,7 +91,9 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.USER_FAVORITE_A,
             params.model_dump(),
         )
-        logger.debug(_("主页喜欢作品接口地址：{0}").format(endpoint))
+        logger.debug(
+            _("主页喜欢作品接口地址：{0}").format(mask_sensitive_url(endpoint))
+        )
         return await self._fetch_get_json(endpoint)
 
     async def fetch_user_collection(self, params: UserCollection):
@@ -99,7 +102,9 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.USER_COLLECTION,
             params.model_dump(),
         )
-        logger.debug(_("主页收藏作品接口地址：{0}").format(endpoint))
+        logger.debug(
+            _("主页收藏作品接口地址：{0}").format(mask_sensitive_url(endpoint))
+        )
         return await self._fetch_post_json(endpoint, params.model_dump())
 
     async def fetch_user_collects(self, params: UserCollects):
@@ -108,7 +113,7 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.USER_COLLECTS,
             params.model_dump(),
         )
-        logger.debug(_("收藏夹接口地址：{0}").format(endpoint))
+        logger.debug(_("收藏夹接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_user_collects_video(self, params: UserCollectsVideo):
@@ -117,7 +122,7 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.USER_COLLECTS_VIDEO,
             params.model_dump(),
         )
-        logger.debug(_("收藏夹作品接口地址：{0}").format(endpoint))
+        logger.debug(_("收藏夹作品接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_user_music_collection(self, params: UserMusicCollection):
@@ -126,7 +131,7 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.USER_MUSIC_COLLECTION,
             params.model_dump(),
         )
-        logger.debug(_("音乐收藏接口地址：{0}").format(endpoint))
+        logger.debug(_("音乐收藏接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_user_mix(self, params: UserMix):
@@ -135,7 +140,7 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.MIX_AWEME,
             params.model_dump(),
         )
-        logger.debug(_("合集作品接口地址：{0}").format(endpoint))
+        logger.debug(_("合集作品接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_post_detail(self, params: PostDetail):
@@ -144,7 +149,7 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.POST_DETAIL,
             params.model_dump(),
         )
-        logger.debug(_("作品详情接口地址：{0}").format(endpoint))
+        logger.debug(_("作品详情接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_post_comment(self, params: PostDetail):
@@ -153,7 +158,7 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.POST_COMMENT,
             params.model_dump(),
         )
-        logger.debug(_("作品评论接口地址：{0}").format(endpoint))
+        logger.debug(_("作品评论接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_post_feed(self, params: PostDetail):
@@ -162,7 +167,9 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.TAB_FEED,
             params.model_dump(),
         )
-        logger.debug(_("首页推荐作品接口地址：{0}").format(endpoint))
+        logger.debug(
+            _("首页推荐作品接口地址：{0}").format(mask_sensitive_url(endpoint))
+        )
         return await self._fetch_get_json(endpoint)
 
     async def fetch_follow_feed(self, params: PostDetail):
@@ -171,7 +178,7 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.FOLLOW_FEED,
             params.model_dump(),
         )
-        logger.debug(_("关注作品接口地址：{0}").format(endpoint))
+        logger.debug(_("关注作品接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_friend_feed(self, params: PostDetail):
@@ -180,7 +187,7 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.FRIEND_FEED,
             params.model_dump(),
         )
-        logger.debug(_("朋友作品接口地址：{0}").format(endpoint))
+        logger.debug(_("朋友作品接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_post_json(endpoint)
 
     async def fetch_post_related(self, params: PostDetail):
@@ -189,7 +196,9 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.POST_RELATED,
             params.model_dump(),
         )
-        logger.debug(_("相关推荐作品接口地址：{0}").format(endpoint))
+        logger.debug(
+            _("相关推荐作品接口地址：{0}").format(mask_sensitive_url(endpoint))
+        )
         return await self._fetch_get_json(endpoint)
 
     async def fetch_live(self, params: UserLive):
@@ -198,7 +207,7 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.LIVE_INFO,
             params.model_dump(),
         )
-        logger.debug(_("直播接口地址：{0}").format(endpoint))
+        logger.debug(_("直播接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_live_room_id(self, params: UserLive2):
@@ -211,7 +220,9 @@ class DouyinCrawler(BaseCrawler):
                 dyendpoint.LIVE_INFO_ROOM_ID,
                 params.model_dump(),
             )
-            logger.debug(_("直播接口地址（room_id）：{0}").format(endpoint))
+            logger.debug(
+                _("直播接口地址（room_id）：{0}").format(mask_sensitive_url(endpoint))
+            )
             return await self._fetch_get_json(endpoint)
         finally:
             self.aclient.headers = original_headers
@@ -222,7 +233,9 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.FOLLOW_USER_LIVE,
             params.model_dump(),
         )
-        logger.debug(_("关注用户直播接口地址：{0}").format(endpoint))
+        logger.debug(
+            _("关注用户直播接口地址：{0}").format(mask_sensitive_url(endpoint))
+        )
         return await self._fetch_get_json(endpoint)
 
     async def fetch_locate_post(self, params: UserPost):
@@ -231,7 +244,9 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.LOCATE_POST,
             params.model_dump(),
         )
-        logger.debug(_("定位上一次作品接口地址：{0}").format(endpoint))
+        logger.debug(
+            _("定位上一次作品接口地址：{0}").format(mask_sensitive_url(endpoint))
+        )
         return await self._fetch_get_json(endpoint)
 
     async def fetch_login_qrcode(self, parms: LoginGetQr):
@@ -240,7 +255,9 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.SSO_LOGIN_GET_QR,
             parms.model_dump(),
         )
-        logger.debug(_("SSO获取二维码接口地址：{0}").format(endpoint))
+        logger.debug(
+            _("SSO获取二维码接口地址：{0}").format(mask_sensitive_url(endpoint))
+        )
         return await self._fetch_get_json(endpoint)
 
     async def fetch_check_qrcode(self, parms: LoginCheckQr):
@@ -249,7 +266,9 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.SSO_LOGIN_CHECK_QR,
             parms.model_dump(),
         )
-        logger.debug(_("SSO检查扫码状态接口地址：{0}").format(endpoint))
+        logger.debug(
+            _("SSO检查扫码状态接口地址：{0}").format(mask_sensitive_url(endpoint))
+        )
         return await self._fetch_response(endpoint)
 
     async def fetch_check_login(self, parms: LoginCheckQr):
@@ -258,7 +277,9 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.SSO_LOGIN_CHECK_LOGIN,
             parms.model_dump(),
         )
-        logger.debug(_("SSO检查登录状态接口地址：{0}").format(endpoint))
+        logger.debug(
+            _("SSO检查登录状态接口地址：{0}").format(mask_sensitive_url(endpoint))
+        )
         return await self._fetch_get_json(endpoint)
 
     async def fetch_user_following(self, params: UserFollowing):
@@ -267,7 +288,9 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.USER_FOLLOWING,
             params.model_dump(),
         )
-        logger.debug(_("用户关注列表接口地址：{0}").format(endpoint))
+        logger.debug(
+            _("用户关注列表接口地址：{0}").format(mask_sensitive_url(endpoint))
+        )
         return await self._fetch_get_json(endpoint)
 
     async def fetch_user_follower(self, params: UserFollower):
@@ -276,7 +299,9 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.USER_FOLLOWER,
             params.model_dump(),
         )
-        logger.debug(_("用户粉丝列表接口地址：{0}").format(endpoint))
+        logger.debug(
+            _("用户粉丝列表接口地址：{0}").format(mask_sensitive_url(endpoint))
+        )
         return await self._fetch_get_json(endpoint)
 
     async def fetch_live_im_fetch(self, params: LiveImFetch):
@@ -285,7 +310,9 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.LIVE_IM_FETCH,
             params.model_dump(),
         )
-        logger.debug(_("直播弹幕初始化接口地址：{0}").format(endpoint))
+        logger.debug(
+            _("直播弹幕初始化接口地址：{0}").format(mask_sensitive_url(endpoint))
+        )
         return await self._fetch_get_json(endpoint)
 
     async def fetch_query_user(self, params: QueryUser):
@@ -294,7 +321,7 @@ class DouyinCrawler(BaseCrawler):
             dyendpoint.QUERY_USER,
             params.model_dump(),
         )
-        logger.debug(_("查询用户接口地址：{0}").format(endpoint))
+        logger.debug(_("查询用户接口地址：{0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def __aenter__(self):
@@ -321,7 +348,7 @@ class DouyinWebSocketCrawler(WebSocketCrawler):
             dyendpoint.LIVE_IM_WSS,
             params.model_dump(),
         )
-        logger.debug(_("直播弹幕接口地址：{0}").format(endpoint))
+        logger.debug(_("直播弹幕接口地址：{0}").format(mask_sensitive_url(endpoint)))
         await self.connect_websocket(endpoint)
         return await self.receive_messages()
 
@@ -332,6 +359,8 @@ class DouyinWebSocketCrawler(WebSocketCrawler):
         Args:
             message (bytes): WebSocket 消息的字节数据
         """
+        # 协议解析边界：PushFrame/gzip/Response 任一步失败都说明消息本身损坏或不兼容，
+        # 只记录具体异常类型与上下文，丢弃该条消息，不影响后续消息的接收。
         try:
             wss_package = PushFrame()
             wss_package.ParseFromString(message)
@@ -339,26 +368,41 @@ class DouyinWebSocketCrawler(WebSocketCrawler):
             decompressed = gzip.decompress(wss_package.payload)
             payload_package = Response()
             payload_package.ParseFromString(decompressed)
+        except DecodeError as exc:
+            logger.error(
+                _("解析 WebSocket 消息失败（protobuf 解码错误）：{0}").format(exc)
+            )
+            return
+        except OSError as exc:
+            logger.error(_("解析 WebSocket 消息失败（gzip 解压错误）：{0}").format(exc))
+            return
 
-            # 发送 ack 包
-            if payload_package.needAck:
+        # 发送 ack 包：网络边界，失败时记录并继续处理已收到的消息
+        if payload_package.needAck:
+            try:
                 await self.send_ack(log_id, payload_package.internalExt)
+            except Exception as exc:
+                logger.error(_("发送 ack 包失败：{0}").format(exc))
 
-            # 处理每个消息
-            for msg in payload_package.messagesList:
-                method = msg.method
-                payload = msg.payload
+        # 处理每个消息
+        for msg in payload_package.messagesList:
+            method = msg.method
+            payload = msg.payload
 
-                # 调用对应的回调函数处理消息
-                if method in self.callbacks:
+            # 回调执行边界：回调由调用方注入，可能是任意用户代码，
+            # 单个回调异常不应中断其余消息/回调的处理，但需要记录是哪个回调失败。
+            if method in self.callbacks:
+                try:
                     await self.callbacks[method](data=payload)
-                else:
-                    logger.warning(
-                        _("未找到对应的回调函数处理消息：{0}").format(method)
+                except Exception as exc:
+                    logger.error(
+                        _("回调函数处理消息失败：method={0}，异常：{1}").format(
+                            method, exc
+                        )
                     )
-
-        except Exception:
-            logger.error(traceback.format_exc())
+                    logger.debug(traceback.format_exc())
+            else:
+                logger.warning(_("未找到对应的回调函数处理消息：{0}").format(method))
 
     async def send_ack(self, log_id: str, internal_ext: str):
         """

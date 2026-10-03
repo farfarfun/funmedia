@@ -8,7 +8,7 @@ import traceback
 from pathlib import Path
 from urllib.error import HTTPError as urllib_HTTPError
 from rich.progress import TaskID
-from typing import Union, Optional, Any, List
+from typing import Any
 
 from funmedia.log.logger import logger
 from funmedia.i18n.translator import _
@@ -40,7 +40,7 @@ class BaseDownloader(BaseCrawler):
         self.download_tasks = []
 
     @staticmethod
-    def _ensure_path(path: Union[str, Path]) -> Path:
+    def _ensure_path(path: str | Path) -> Path:
         return ensure_path(path)
 
     async def _download_chunks(
@@ -94,16 +94,16 @@ class BaseDownloader(BaseCrawler):
     async def download_file(
         self,
         task_id: TaskID,
-        urls: Union[str, List[str]],
-        full_path: Union[str, Path],
+        urls: str | list[str],
+        full_path: str | Path,
     ) -> None:
         """
         下载文件 (Download file)
 
         Args:
             task_id (TaskID): 任务ID (Task ID)
-            urls (Union[str, List[str]]): 文件URL (File URL)
-            full_path (Union[str, Path]): 保存路径 (Save path)
+            urls (str | list[str]): 文件URL (File URL)
+            full_path (str | Path): 保存路径 (Save path)
 
         Note:
             url仅代表一个文件的链接，当url为列表时，表示该文件的多个链接
@@ -225,7 +225,7 @@ class BaseDownloader(BaseCrawler):
         self,
         task_id: TaskID,
         content: Any,
-        full_path: Union[str, Path],
+        full_path: str | Path,
     ):
         """
         保存文件 (Save file)
@@ -233,7 +233,7 @@ class BaseDownloader(BaseCrawler):
         Args:
             task_id (TaskID): 任务ID (Task ID)
             content (Any): 文件内容 (File content)
-            full_path (Union[str, Path]): 保存路径 (Save path)
+            full_path (str | Path): 保存路径 (Save path)
         """
         # 确保目标路径存在 (Ensure target path exists)
         full_path = self._ensure_path(full_path)
@@ -260,7 +260,7 @@ class BaseDownloader(BaseCrawler):
         self,
         task_id: TaskID,
         url: str,
-        full_path: Union[str, Path],
+        full_path: str | Path,
     ) -> None:
         """
         下载m3u8流视频 (Download m3u8 stream video)
@@ -268,7 +268,7 @@ class BaseDownloader(BaseCrawler):
         Args:
             task_id (TaskID): 任务ID (Task ID)
             url (str): m3u8文件的URL (m3u8 file URL)
-            full_path (Union[str, Path]): 保存路径 (Save path)
+            full_path (str | Path): 保存路径 (Save path)
         """
         async with self.semaphore:
             full_path = self._ensure_path(full_path)
@@ -420,10 +420,10 @@ class BaseDownloader(BaseCrawler):
     async def initiate_download(
         self,
         file_type: str,
-        file_url: Union[str, List[str]],
-        base_path: Union[str, Path],
+        file_url: str | list[str],
+        base_path: str | Path,
         file_name: str,
-        file_suffix: Optional[str],
+        file_suffix: str | None,
     ) -> None:
         """
         初始化下载任务。如果文件已经存在，则跳过下载。否则，创建一个新的异步下载任务。
@@ -432,10 +432,10 @@ class BaseDownloader(BaseCrawler):
 
         Args:
             file_type (str): 文件类型描述 (File type description)
-            file_url (Union[str, List[str]]): 文件URL (File URL)
+            file_url (str | list[str]): 文件URL (File URL)
             file_name (str): 文件名称 (File name)
-            base_path (Union[str, Path]): 基础路径 (Base path)
-            file_suffix (Optional[str]): 文件后缀 (File suffix)
+            base_path (str | Path): 基础路径 (Base path)
+            file_suffix (str | None): 文件后缀 (File suffix)
 
         Note:
             file_url仅代表一个文件的链接，当file_url为列表时，表示该文件的多个链接
@@ -473,9 +473,9 @@ class BaseDownloader(BaseCrawler):
         self,
         file_type: str,
         content: Any,
-        base_path: Union[str, Path],
+        base_path: str | Path,
         file_name: str,
-        file_suffix: Optional[str],
+        file_suffix: str | None,
     ) -> None:
         """
         初始化静态下载任务。如果文件已经存在，则跳过下载。否则，创建一个新的异步下载任务。
@@ -486,8 +486,8 @@ class BaseDownloader(BaseCrawler):
             file_type (str): 文件类型描述 (File type description)
             file_url (str): 文件URL (File URL)
             file_name (str): 文件名称 (File name)
-            base_path (Union[str, Path]): 基础路径 (Base path)
-            file_suffix (Optional[str]): 文件后缀 (File suffix)
+            base_path (str | Path): 基础路径 (Base path)
+            file_suffix (str | None): 文件后缀 (File suffix)
         """
 
         # 文件路径
@@ -520,9 +520,9 @@ class BaseDownloader(BaseCrawler):
         self,
         file_type: str,
         m3u8_url: str,
-        base_path: Union[str, Path],
+        base_path: str | Path,
         file_name: str,
-        file_suffix: Optional[str],
+        file_suffix: str | None,
     ) -> None:
         """
         初始化m3u8流视频下载任务。如果文件已经存在，则跳过下载。否则，创建一个新的异步下载任务。
@@ -533,8 +533,8 @@ class BaseDownloader(BaseCrawler):
             file_type (str): 文件类型描述 (File type description)
             m3u8_url (str): m3u8文件的URL (m3u8 file URL)
             file_name (str): 文件名称 (File name)
-            base_path (Union[str, Path]): 基础路径 (Base path)
-            file_suffix (Optional[str]): 文件后缀 (File suffix)
+            base_path (str | Path): 基础路径 (Base path)
+            file_suffix (str | None): 文件后缀 (File suffix)
         """
         # 文件路径
         file_path = f"{file_name}{file_suffix}"

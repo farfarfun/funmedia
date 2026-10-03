@@ -11,13 +11,64 @@ import traceback
 import browser_cookie3
 import importlib_resources
 
-from typing import Union, Any
+from typing import Any
 from pathlib import Path
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 
 from funmedia.log.logger import logger
 
 # 生成一个 16 字节的随机字节串 (Generate a random byte string of 16 bytes)
 seed_bytes = secrets.token_bytes(16)
+
+# 日志脱敏时需要掩码的查询参数关键字（小写子串匹配）
+# (Keywords used to mask sensitive query parameters in logs, case-insensitive substring match)
+_SENSITIVE_URL_PARAM_KEYWORDS = (
+    "token",
+    "signature",
+    "sign",
+    "bogus",
+    "cookie",
+    "authorization",
+    "ttwid",
+    "sessionid",
+    "verifyfp",
+    "passport",
+)
+
+
+def mask_sensitive_url(url: str) -> str:
+    """
+    对 URL 中的敏感查询参数做脱敏，仅用于日志输出，不用于真实请求
+    (Mask sensitive query parameters in a URL for logging only; never use the masked
+    result to send real requests)
+
+    Args:
+        url (str): 原始 URL，可能包含 msToken、signature、X-Bogus 等敏感参数
+
+    Returns:
+        str: 域名、路径保留，敏感参数值替换为 "***" 后的 URL；无法解析时原样返回
+    """
+    try:
+        parts = urlsplit(url)
+    except ValueError:
+        return url
+
+    if not parts.query:
+        return url
+
+    masked_pairs = []
+    for key, value in parse_qsl(parts.query, keep_blank_values=True):
+        lower_key = key.lower()
+        if any(keyword in lower_key for keyword in _SENSITIVE_URL_PARAM_KEYWORDS):
+            masked_pairs.append((key, "***"))
+        else:
+            masked_pairs.append((key, value))
+
+    masked_query = urlencode(masked_pairs)
+    return urlunsplit(
+        (parts.scheme, parts.netloc, parts.path, masked_query, parts.fragment)
+    )
+
 
 # 将字节字符串转换为整数 (Convert the byte string to an integer)
 seed_int = int.from_bytes(seed_bytes, "big")
@@ -67,7 +118,7 @@ def get_timestamp(unit: str = "milli"):
 
 
 def timestamp_2_str(
-    timestamp: Union[str, int, float],
+    timestamp: str | int | float,
     format: str = "%Y-%m-%d %H-%M-%S",
     tz: datetime.timezone = datetime.timezone(datetime.timedelta(hours=8)),
 ) -> str:
@@ -143,14 +194,14 @@ def split_dict_cookie(cookie_dict: dict) -> str:
     return "; ".join(f"{key}={value}" for key, value in cookie_dict.items())
 
 
-def extract_valid_urls(inputs: Union[str, list[str]]) -> Union[str, list[str], None]:
+def extract_valid_urls(inputs: str | list[str]) -> str | list[str] | None:
     """从输入中提取有效的URL (Extract valid URLs from input)
 
     Args:
-        inputs (Union[str, list[str]]): 输入的字符串或字符串列表 (Input string or list of strings)
+        inputs (str | list[str]): 输入的字符串或字符串列表 (Input string or list of strings)
 
     Returns:
-        Union[str, list[str]]: 提取出的有效URL或URL列表 (Extracted valid URL or list of URLs)
+        str | list[str]: 提取出的有效URL或URL列表 (Extracted valid URL or list of URLs)
     """
     url_pattern = re.compile(r"https?://\S+")
 
@@ -195,7 +246,7 @@ def get_resource_path(filepath: str):
     return importlib_resources.files("funmedia") / filepath
 
 
-def replaceT(obj: Union[str, Any]) -> Union[str, Any]:
+def replaceT(obj: str | Any) -> str | Any:
     """
     替换文案非法字符 (Replace illegal characters in the text)
 
@@ -252,7 +303,7 @@ def split_filename(text: str, os_limit: dict) -> str:
         return text
 
 
-def ensure_path(path: Union[str, Path]) -> Path:
+def ensure_path(path: str | Path) -> Path:
     """确保路径是一个Path对象 (Ensure the path is a Path object)"""
     return Path(path) if isinstance(path, str) else path
 

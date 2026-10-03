@@ -26,7 +26,9 @@ python -m funmedia douyin -u "https://www.douyin.com/user/xxx" -M post -p ./Down
 
 - `-u/--url`：主页、作品、合集或直播链接
 - `-M/--mode`：下载模式，抖音支持 `one/post/like/collection/collects/music/mix/live/related/friend` 等（见 `funmedia/__init__.py` 中的 `DOUYIN_MODE_LIST`）
-- `-k/--cookie`：登录后的 Cookie，未登录状态下无法稳定下载
+- `-k/--cookie`：登录后的 Cookie，未登录状态下无法稳定下载。也可通过环境变量传入，避免 Cookie
+  以明文形式落盘到配置文件：`FUNMEDIA_DOUYIN_COOKIE`/`FUNMEDIA_TIKTOK_COOKIE`/
+  `FUNMEDIA_WEIBO_COOKIE`/`FUNMEDIA_TWITTER_COOKIE`
 - `-p/--path`：作品保存路径
 - `-n/--naming`：文件命名模板
 

@@ -1,7 +1,7 @@
 # path: f2/apps/weibo/handler.py
 
 from pathlib import Path
-from typing import AsyncGenerator, Union, Dict, Any, List
+from typing import AsyncGenerator, Any
 
 from funmedia.log.logger import logger
 from funmedia.i18n.translator import _
@@ -206,7 +206,7 @@ class WeiboHandler:
 
         await self.downloader.create_download_tasks(self.kwargs, weibo_data, user_path)
 
-    async def fetch_user_weibo(self, user_id: str) -> Dict[str, Any]:
+    async def fetch_user_weibo(self, user_id: str) -> dict[str, Any]:
         """
         用于获取用户微博数据。
 

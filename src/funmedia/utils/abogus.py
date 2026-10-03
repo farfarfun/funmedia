@@ -21,7 +21,7 @@ import time
 import random
 
 from gmssl import sm3, func
-from typing import Union, Callable
+from typing import Callable
 
 
 class StringProcessor:
@@ -205,12 +205,12 @@ class CryptoUtility:
         # fmt: on
 
     @staticmethod
-    def sm3_to_array(input_data: Union[str, list[int]]) -> list[int]:
+    def sm3_to_array(input_data: str | list[int]) -> list[int]:
         """
         计算请求体的 SM3 哈希值，并将结果转换为整数数组 (Calculate the SM3 hash value of the request body and convert the result to an array of integers).
 
         Args:
-            input_data (Union[str, list[int]]): 输入数据 (Input data).
+            input_data (str | list[int]): 输入数据 (Input data).
 
         Returns:
             list[int]: 哈希值的整数数组 (Array of integers representing the hash value).
@@ -239,31 +239,29 @@ class CryptoUtility:
         """
         return param + self.salt
 
-    def process_param(
-        self, param: Union[str, list[int]], add_salt: bool
-    ) -> Union[str, list[int]]:
+    def process_param(self, param: str | list[int], add_salt: bool) -> str | list[int]:
         """
         处理输入参数，根据需要添加盐值 (Process input parameter and add salt if needed).
 
         Args:
-            param (Union[str, list[int]]): 输入参数 (Input parameter).
+            param (str | list[int]): 输入参数 (Input parameter).
             add_salt (bool): 是否添加盐值 (Whether to add salt).
 
         Returns:
-            Union[str, list[int]]: 处理后的参数 (Processed parameter).
+            str | list[int]: 处理后的参数 (Processed parameter).
         """
         if isinstance(param, str) and add_salt:
             param = self.add_salt(param)
         return param
 
     def params_to_array(
-        self, param: Union[str, list[int]], add_salt: bool = True
+        self, param: str | list[int], add_salt: bool = True
     ) -> list[int]:
         """
         获取输入参数的哈希数组 (Get the hash array of the input parameter).
 
         Args:
-            param (Union[str, list[int]]): 输入参数 (Input parameter).
+            param (str | list[int]): 输入参数 (Input parameter).
             add_salt (bool): 是否添加盐值 (Whether to add salt).
 
         Returns:

@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from urllib.parse import quote, unquote
-from typing import AsyncGenerator, Union, Any
+from typing import AsyncGenerator, Any
 
 from funmedia.i18n.translator import _
 from funmedia.log.logger import logger
@@ -590,17 +590,17 @@ class TiktokHandler:
 
     async def select_playlist(
         self,
-        playlists: Union[dict, UserPlayListFilter],
-    ) -> Union[str, list[str]]:
+        playlists: dict | UserPlayListFilter,
+    ) -> str | list[str]:
         """
         用于选择要下载的作品合集
         (Used to select the video mix to download)
 
         Args:
-            playlists: Union[dict, UserPlayListFilter]: 作品合集列表 (Video mix list)
+            playlists: dict | UserPlayListFilter: 作品合集列表 (Video mix list)
 
         Return:
-            selected_index: Union[str, list[str]]: 选择的作品合集序号 (Selected video mix index)
+            selected_index: str | list[str]: 选择的作品合集序号 (Selected video mix index)
         """
 
         if playlists == {}:

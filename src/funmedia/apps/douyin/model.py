@@ -3,11 +3,20 @@
 from typing import Any
 from urllib.parse import quote
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from funmedia.exceptions.api_exceptions import APIError
 from funmedia.log.logger import logger
 from .utils import ClientConfManager, TokenManager, VerifyFpManager
+
+
+def _gen_ms_token_default() -> str:
+    """生成 msToken 默认值，失败时降级为虚假 token，避免在模块导入时发起网络请求。"""
+    try:
+        return TokenManager.gen_real_msToken()
+    except APIError as exc:
+        logger.warning("生成 msToken 失败，使用随机 token：{0}", exc)
+        return TokenManager.gen_false_msToken()
 
 
 # Base Model
@@ -36,11 +45,7 @@ class BaseRequestModel(BaseModel):
     downlink: int = 10
     effective_type: str = "4g"
     round_trip_time: int = 100
-    try:
-        msToken: str = TokenManager.gen_real_msToken()
-    except:
-        # 返回虚假的msToken (Return a fake msToken)
-        msToken: str = TokenManager.gen_false_msToken()
+    msToken: str = Field(default_factory=_gen_ms_token_default)
 
 
 class BaseLiveModel(BaseModel):
@@ -69,11 +74,7 @@ class BaseLiveModel2(BaseModel):
     sec_user_id: str = ""
     version_code: str = "99.99.99"
     app_id: str = "1128"
-    try:
-        msToken: str = TokenManager.gen_real_msToken()
-    except APIError as exc:
-        logger.warning(f"生成 msToken 失败，使用随机 token: {exc}")
-        msToken: str = TokenManager.gen_false_msToken()
+    msToken: str = Field(default_factory=_gen_ms_token_default)
 
 
 class BaseLoginModel(BaseModel):

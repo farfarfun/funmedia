@@ -23,7 +23,7 @@ from funmedia.apps.tiktok.utils import ClientConfManager
 
 def handler_help(
     ctx: click.Context,
-    param: typing.Union[click.Option, click.Parameter],
+    param: click.Option | click.Parameter,
     value: typing.Any,
 ) -> None:
     """
@@ -45,7 +45,7 @@ def handler_help(
 
 def handler_auto_cookie(
     ctx: click.Context,
-    param: typing.Union[click.Option, click.Parameter],
+    param: click.Option | click.Parameter,
     value: typing.Any,
 ) -> None:
     """
@@ -84,7 +84,7 @@ def handler_auto_cookie(
 
 def handler_language(
     ctx: click.Context,
-    param: typing.Union[click.Option, click.Parameter],
+    param: click.Option | click.Parameter,
     value: typing.Any,
 ) -> typing.Any:
     """用于设置语言 (For setting the language)
@@ -105,14 +105,14 @@ def handler_language(
 
 def handler_naming(
     ctx: click.Context,
-    param: typing.Union[click.Option, click.Parameter],
+    param: click.Option | click.Parameter,
     value: typing.Any,
 ) -> str:
     """处理命名模式 (Handle naming patterns)
 
     Args:
         ctx (click.Context): click的上下文对象 (Click's context object)
-        param (typing.Union[click.Option, click.Parameter]): 提供的参数或选项 (The provided parameter or option)
+        param (click.Option | click.Parameter): 提供的参数或选项 (The provided parameter or option)
         value (typing.Any): 参数或选项的值 (The value of the parameter or option)
 
     Raises:
@@ -223,6 +223,7 @@ def handler_naming(
     "--cookie",
     "-k",
     type=str,
+    envvar="FUNMEDIA_TIKTOK_COOKIE",
     # default="",
     help=_(
         "登录后的[yellow]cookie[/yellow]，如果使用未登录的[yellow]cookie[/yellow]，则无法持久稳定下载作品"

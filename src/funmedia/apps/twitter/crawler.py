@@ -2,6 +2,7 @@
 
 from funmedia.log.logger import logger
 from funmedia.i18n.translator import _
+from funmedia.utils.utils import mask_sensitive_url
 from funmedia.crawlers.base_crawler import BaseCrawler
 from funmedia.apps.twitter.api import TwitterAPIEndpoints as xendpoints
 from funmedia.apps.twitter.model import (
@@ -44,7 +45,7 @@ class TwitterCrawler(BaseCrawler):
             xendpoints.POST_DETAIL,
             TweetDetail(variables=encode_model(params)).model_dump(),
         )
-        logger.debug(_("推文详情接口地址: {0}").format(endpoint))
+        logger.debug(_("推文详情接口地址: {0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_user_profile(self, params: UserProfileEncode):
@@ -52,7 +53,7 @@ class TwitterCrawler(BaseCrawler):
             xendpoints.USER_PROFILE,
             UserProfile(variables=encode_model(params)).model_dump(),
         )
-        logger.debug(_("用户信息接口地址: {0}").format(endpoint))
+        logger.debug(_("用户信息接口地址: {0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)
 
     async def fetch_post_tweet(self, params: PostTweetEncode):
@@ -60,5 +61,5 @@ class TwitterCrawler(BaseCrawler):
             xendpoints.USER_POST,
             PostTweet(variables=encode_model(params)).model_dump(),
         )
-        logger.debug(_("推文接口地址: {0}").format(endpoint))
+        logger.debug(_("推文接口地址: {0}").format(mask_sensitive_url(endpoint)))
         return await self._fetch_get_json(endpoint)

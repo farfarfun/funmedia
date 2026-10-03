@@ -1,22 +1,21 @@
 # path: f2/db/base_db.py
 
 import aiosqlite
-from typing import Optional
 
 
 class BaseDB:
-    def __init__(self, db_name: str) -> Optional[None]:
+    def __init__(self, db_name: str) -> None:
         self.db_name = db_name
         self.conn = None
 
-    async def connect(self) -> Optional[None]:
+    async def connect(self) -> None:
         """
         连接到数据库
         """
         self.conn = await aiosqlite.connect(self.db_name)
         await self._create_table()
 
-    async def _create_table(self) -> Optional[None]:
+    async def _create_table(self) -> None:
         """
         在数据库中创建表
         """
@@ -32,7 +31,7 @@ class BaseDB:
         )
         return int(result[0]) if result else 0
 
-    async def set_version(self, version: int) -> Optional[None]:
+    async def set_version(self, version: int) -> None:
         await self.execute(
             "INSERT OR REPLACE INTO _metadata (name, value) VALUES (?, ?)",
             ("version", str(version)),
@@ -85,13 +84,13 @@ class BaseDB:
         cursor = await self.execute(query, parameters)
         return await cursor.fetchall()
 
-    async def commit(self) -> Optional[None]:
+    async def commit(self) -> None:
         """
         提交更改到数据库
         """
         await self.conn.commit()
 
-    async def close(self) -> Optional[None]:
+    async def close(self) -> None:
         """
         关闭与数据库的连接
         """
