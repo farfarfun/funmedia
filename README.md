@@ -2,16 +2,16 @@
 
 异步多平台短视频/社媒无水印下载工具，支持抖音、TikTok、微博、Twitter(X) 四个平台，可按用户主页、点赞、收藏、合集、直播等模式批量抓取并下载作品（视频/图集/音乐/封面/文案）。
 
-说明：本项目代码基于知名开源项目 [f2](https://github.com/Johnserf-Seed/f2) 改名而来（源码内保留了大量 `f2` 相关注释、路径标记与 `__repourl__` 指向原仓库），当前仅实现了 douyin/tiktok/weibo/twitter 四个应用，`funmedia/apps/__apps__.py` 中声明的 youtube、instagram、bilibili、twitch、neteasy_music、little_red_book 尚未有对应实现目录。
+说明：本项目代码基于知名开源项目 [f2](https://github.com/Johnserf-Seed/f2) 改名而来（源码内仍保留部分 `f2` 来源注释与路径标记），当前仅实现了 douyin/tiktok/weibo/twitter 四个应用，`funmedia/apps/__apps__.py` 中声明的 youtube、instagram、bilibili、twitch、neteasy_music、little_red_book 尚未有对应实现目录。
 
 ## 安装
 
-目前尚未发布可用的 PyPI 包（`pip install funmedia` 获取到的是占位包，无实际功能代码），需要从源码安装：
+目前尚未发布可用的 PyPI 包（`pip install funmedia` 获取到的是占位包，无实际功能代码），需要从源码安装。请先安装 [uv](https://docs.astral.sh/uv/)，再执行：
 
 ```bash
 git clone https://github.com/farfarfun/funmedia.git
 cd funmedia
-pip install -e .
+uv sync --all-groups
 ```
 
 ## 命令行用法
@@ -39,11 +39,20 @@ python -m funmedia douyin -u "https://www.douyin.com/user/xxx" -M post -p ./Down
 各平台的核心逻辑封装在对应的 `Handler` 类中，例如抖音：
 
 ```python
+import asyncio
+
 from funmedia.apps.douyin.handler import DouyinHandler
 
-handler = DouyinHandler(kwargs={"cookie": "...", "path": "./Download"})
-profile = await handler.fetch_user_profile(sec_user_id="...")
+
+async def main():
+    handler = DouyinHandler(kwargs={"cookie": "<已登录的 Cookie>", "path": "./Download"})
+    return await handler.fetch_user_profile(sec_user_id="<抖音用户 sec_uid>")
+
+
+profile = asyncio.run(main())
 ```
+
+该示例需要有效的抖音 Cookie 和 `sec_uid`，会访问真实平台；网络或认证失败时会抛出 API 异常。
 
 下载、过滤、数据模型分别在同目录下的 `dl.py`（`DouyinDownloader`）、`filter.py`、`model.py` 中实现，`crawler.py` 提供底层请求封装（`DouyinCrawler`/`DouyinWebSocketCrawler`）。
 

@@ -1,8 +1,8 @@
-# path: f2/__init__.py
+# path: funmedia/__init__.py
 
 from importlib.metadata import PackageNotFoundError, version as _metadata_version
 
-__author__ = "JohnserfSeed <johnserf-seed@foxmail.com>"
+__author__ = "farfarfun"
 try:
     # 版本号唯一来源是 pyproject.toml，运行时从已安装的包元数据读取，避免手动维护的
     # 常量与实际发布版本脱节 (Single source of truth is pyproject.toml; read it from
@@ -12,8 +12,8 @@ except PackageNotFoundError:  # 从源码目录直接运行、尚未安装时的
     __version__ = "0.0.0.dev0"
 __description_cn__ = "基于[red]异步[/red]的[green]全平台下载工具."
 __description_en__ = "[yellow]Asynchronous based [/yellow]full-platform download tool."
-__reponame__ = "f2"
-__repourl__ = "https://github.com/Johnserf-Seed/f2"
+__reponame__ = "funmedia"
+__repourl__ = "https://github.com/farfarfun/funmedia"
 
 APP_CONFIG_FILE_PATH = "conf/app.yaml"
 F2_CONFIG_FILE_PATH = "conf/conf.yaml"
