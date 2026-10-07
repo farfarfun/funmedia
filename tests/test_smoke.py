@@ -162,6 +162,39 @@ def test_db_and_file_exceptions_import():
     import funmedia.exceptions.file_exceptions  # noqa: F401
 
 
+def test_base_crawler_enables_tls_verification(monkeypatch):
+    from funmedia.crawlers import base_crawler
+
+    monkeypatch.setattr(base_crawler.httpx, "AsyncClient", lambda **kwargs: kwargs)
+    monkeypatch.setattr(base_crawler.httpx, "Client", lambda **kwargs: kwargs)
+
+    crawler = base_crawler.BaseCrawler()
+    assert crawler.aclient["verify"] is True
+    assert crawler.client["verify"] is True
+
+
+@pytest.mark.parametrize("method_name", ["get_fetch_data", "post_fetch_data", "head_fetch_data"])
+def test_base_crawler_propagates_api_errors(method_name):
+    from funmedia.crawlers.base_crawler import BaseCrawler
+    from funmedia.exceptions.api_exceptions import APIRetryExhaustedError
+
+    class FailingClient:
+        async def get(self, *args, **kwargs):
+            raise APIRetryExhaustedError("request failed")
+
+        async def post(self, *args, **kwargs):
+            raise APIRetryExhaustedError("request failed")
+
+        async def head(self, *args, **kwargs):
+            raise APIRetryExhaustedError("request failed")
+
+    crawler = BaseCrawler(max_retries=1)
+    crawler._aclient = FailingClient()
+
+    with pytest.raises(APIRetryExhaustedError, match="request failed"):
+        asyncio.run(getattr(crawler, method_name)("https://example.invalid"))
+
+
 # ---------------------------------------------------------------------------
 # Pure utility helpers (funmedia/utils/*.py) -- no network involved
 # ---------------------------------------------------------------------------

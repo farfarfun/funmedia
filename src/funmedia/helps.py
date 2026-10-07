@@ -39,7 +39,7 @@ def main() -> None:
     # 真彩
     console = Console(color_system="truecolor")
     console.print(
-        f"\n:rocket: [bold]f2 {funmedia.__version__} :rocket:", justify="center"
+        f"\n:rocket: [bold]funmedia {funmedia.__version__} :rocket:", justify="center"
     )
     console.print(f"\n[i]{funmedia.__description_cn__}", justify="center")
     console.print(f"[i]{funmedia.__description_en__}", justify="center")
@@ -48,12 +48,12 @@ def main() -> None:
     # 使用方法
     table = Table.grid(padding=1, pad_edge=True)
     table.add_column("Usage", no_wrap=True, justify="left", style="bold")
-    table.add_row("[b]f2[/b] [magenta]<apps> [/magenta][cyan][COMMAND]")
-    table.add_row(_("例：f2 dy -h/--help 获取douyin的命令帮助"))
+    table.add_row("[b]python -m funmedia[/b] [magenta]<apps> [/magenta][cyan][COMMAND]")
+    table.add_row(_("例：python -m funmedia douyin -h/--help 获取 douyin 的命令帮助"))
     table.add_row(
-        "[b]f2[/b] [magenta][Option] [/magenta][cyan][Args][/cyan] [magenta]<apps> [/magenta][cyan][COMMAND]"
+        "[b]python -m funmedia[/b] [magenta][Option] [/magenta][cyan][Args][/cyan] [magenta]<apps> [/magenta][cyan][COMMAND]"
     )
-    table.add_row(_("例：f2 -d DEBUG dy 日志级别为调试运行"))
+    table.add_row(_("例：python -m funmedia -d DEBUG douyin 日志级别为调试运行"))
     console.print(
         Panel(table, border_style="bold", title="使用方法 | Usage", title_align="left")
     )
@@ -88,7 +88,7 @@ def main() -> None:
     table.add_row(_("little_red_book 或 lrb"), _("- 获取小红书的作品"))
     table.add_row("\n")
     table.add_row(
-        "f2 -d DEBUG",
+        "python -m funmedia -d DEBUG",
         _(
             "- 记录app的调试日志到/logs下，如遇BUG提交Issue时请附带该文件并[red]删除个人敏感信息[/red]"
         ),
@@ -96,11 +96,11 @@ def main() -> None:
     )
     (
         table.add_row(
-            "Issues❓", "[link=https://github.com/Johnserf-Seed/f2/issues]Click Here[/]"
+            "Issues❓", "[link=https://github.com/farfarfun/funmedia/issues]Click Here[/]"
         ),
     )
     table.add_row(
-        "Document📕", "[link=https://johnserf-seed.github.io/f2/]Click Here[/]"
+        "Repository", "[link=https://github.com/farfarfun/funmedia]Click Here[/]"
     )
     console.print(
         Panel(

@@ -83,7 +83,7 @@ class BaseCrawler:
         if self._aclient is None:
             self._aclient = httpx.AsyncClient(
                 headers=self.crawler_headers,
-                verify=False,
+                verify=True,
                 timeout=self.timeout,
                 limits=self.limits,
             )
@@ -94,7 +94,7 @@ class BaseCrawler:
         if self._client is None:
             self._client = httpx.Client(
                 headers=self.crawler_headers,
-                verify=False,
+                verify=True,
                 timeout=self.timeout,
                 limits=self.limits,
             )
@@ -260,8 +260,13 @@ class BaseCrawler:
                     ).format(url, self.proxies, self.__class__.__name__, req_err)
                 )
 
-            except APIError as e:
-                logger.error(e)
+            except APIError:
+                logger.exception(
+                    _("获取 GET 端点失败：URL：{0}，尝试次数：{1}").format(
+                        url, attempt + 1
+                    )
+                )
+                raise
 
     async def post_fetch_data(self, url: str, params: dict = {}):
         """
@@ -308,8 +313,13 @@ class BaseCrawler:
             except httpx.HTTPStatusError as http_error:
                 self.handle_http_status_error(http_error, url, attempt + 1)
 
-            except APIError as e:
-                logger.error(e)
+            except APIError:
+                logger.exception(
+                    _("获取 POST 端点失败：URL：{0}，尝试次数：{1}").format(
+                        url, attempt + 1
+                    )
+                )
+                raise
 
     async def head_fetch_data(self, url: str):
         """
@@ -337,8 +347,9 @@ class BaseCrawler:
         except httpx.HTTPStatusError as http_error:
             self.handle_http_status_error(http_error, url, 1)
 
-        except APIError as e:
-            logger.error(e)
+        except APIError:
+            logger.exception(_("获取 HEAD 端点失败：URL：{0}，尝试次数：1").format(url))
+            raise
 
     def handle_http_status_error(self, http_error, url: str, attempt):
         """
