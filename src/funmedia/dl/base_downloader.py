@@ -60,8 +60,9 @@ class BaseDownloader(BaseCrawler):
             task_id (TaskID): 任务ID (Task ID)
         """
 
+        response = await self.aclient.send(request, stream=True)
         try:
-            response = await self.aclient.send(request, stream=True)
+            response.raise_for_status()
             async for chunk in response.aiter_bytes(get_chunk_size(content_length)):
                 if SignalManager.is_shutdown_signaled():
                     break
@@ -69,27 +70,8 @@ class BaseDownloader(BaseCrawler):
                 await self.progress.update(
                     task_id, advance=len(chunk), total=int(content_length)
                 )
-        except httpx.TimeoutException as e:
-            logger.error(traceback.format_exc())
-            logger.error(_("文件区块超时：{0}").format(e))
-        except httpx.NetworkError as e:
-            logger.error(traceback.format_exc())
-            logger.error(_("文件区块网络错误：{0}").format(e))
-        except httpx.HTTPStatusError as e:
-            logger.error(traceback.format_exc())
-            logger.error(_("文件区块HTTP错误：{0}").format(e))
-        except httpx.ProxyError as e:
-            logger.error(traceback.format_exc())
-            logger.error(_("文件区块代理错误：{0}").format(e))
-        except httpx.UnsupportedProtocol as e:
-            logger.error(traceback.format_exc())
-            logger.error(_("文件区块协议错误：{0}").format(e))
-        except httpx.StreamError as e:
-            logger.error(traceback.format_exc())
-            logger.error(_("文件区块流错误：{0}").format(e))
-        except Exception as e:
-            logger.error(traceback.format_exc())
-            logger.error(_("文件区块下载失败：{0} Exception：{1}").format(request, e))
+        finally:
+            await response.aclose()
 
     async def download_file(
         self,
@@ -167,12 +149,22 @@ class BaseDownloader(BaseCrawler):
                 range_request = self.aclient.build_request(
                     "GET", link, headers=range_headers
                 )
-                async with aiofiles.open(
-                    tmp_path, "ab" if start_byte else "wb"
-                ) as file:
-                    await self._download_chunks(
-                        range_request, file, content_length, task_id
+                try:
+                    async with aiofiles.open(
+                        tmp_path, "ab" if start_byte else "wb"
+                    ) as file:
+                        await self._download_chunks(
+                            range_request, file, content_length, task_id
+                        )
+                except (httpx.HTTPError, OSError) as exc:
+                    logger.error(_("文件区块下载失败：{0}").format(exc))
+                    continue
+
+                if tmp_path.stat().st_size != content_length:
+                    logger.warning(
+                        _("文件下载不完整，尝试下一个链接：{0}").format(link)
                     )
+                    continue
 
                 # 下载完成后重命名文件 (Rename file after download is complete)
                 try:
@@ -190,7 +182,7 @@ class BaseDownloader(BaseCrawler):
                     try:
                         tmp_path.unlink()
                         tmp_path.rename(full_path)
-                    except Exception as e:
+                    except OSError as e:
                         logger.error(_("尝试删除临时文件失败：{0}").format(e))
 
                     await self.progress.update(
@@ -199,6 +191,7 @@ class BaseDownloader(BaseCrawler):
                         filename=trim_filename(full_path.name, 45),
                         state="error",
                     )
+                    raise
 
                 await self.progress.update(
                     task_id,
@@ -220,6 +213,7 @@ class BaseDownloader(BaseCrawler):
                     filename=trim_filename(full_path.name, 45),
                     state="error",
                 )
+                raise RuntimeError(_("所有链接都无法下载：{0}").format(full_path))
 
     async def save_file(
         self,
@@ -344,11 +338,9 @@ class BaseDownloader(BaseCrawler):
                                     # (Record the segment number that has been downloaded)
                                     downloaded_segments.add(segment.absolute_uri)
 
-                                except httpx.ReadTimeout as e:
-                                    logger.warning(_("TS文件下载超时: {0}").format(e))
-                                except Exception as e:
+                                except httpx.HTTPError as e:
                                     logger.error(_("TS文件下载失败: {0}").format(e))
-                                    logger.error(traceback.format_exc())
+                                    raise
                                 finally:
                                     await ts_response.aclose()
                             else:
@@ -373,49 +365,49 @@ class BaseDownloader(BaseCrawler):
                             task_id,
                             description=_("[  丢失  ]："),
                             filename=trim_filename(full_path.name, 45),
-                            state="completed",
+                            state="error",
                         )
-                        return
+                        raise
                     else:
                         logger.error(_("HTTP错误: {0}").format(e))
                         await self.progress.update(
                             task_id,
                             description=_("[  失败  ]："),
                             filename=trim_filename(full_path.name, 45),
-                            state="completed",
+                            state="error",
                         )
-                        return
+                        raise
 
                 except urllib_HTTPError as e:
                     if e.code == 404:
                         logger.warning(_("m3u8文件或ts文件未找到，直播已结束"))
                         await self.progress.update(
                             task_id,
-                            description=_("[  完成  ]:"),
+                            description=_("[  丢失  ]："),
                             filename=trim_filename(full_path.name, 45),
-                            state="completed",
+                            state="error",
                         )
-                        return
+                        raise
                     logger.error(_("m3u8文件下载失败：{0}，但文件已保存").format(e))
                     logger.error(traceback.format_exc())
                     await self.progress.update(
                         task_id,
                         description=_("[  失败  ]："),
                         filename=trim_filename(full_path.name, 45),
-                        state="completed",
+                        state="error",
                     )
-                    return
+                    raise
 
-                except Exception as e:
+                except (httpx.HTTPError, OSError, ValueError) as e:
                     logger.error(_("m3u8文件解析失败: {0}").format(e))
                     logger.error(traceback.format_exc())
                     await self.progress.update(
                         task_id,
                         description=_("[  失败  ]："),
                         filename=trim_filename(full_path.name, 45),
-                        state="completed",
+                        state="error",
                     )
-                    return
+                    raise
 
     async def initiate_download(
         self,

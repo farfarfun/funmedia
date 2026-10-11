@@ -5,9 +5,37 @@ from funmedia.exceptions.api_exceptions import (
 )
 
 
+class FakeResponse:
+    text = "https://twitter.com/example/status/1777291676568166526"
+
+    def raise_for_status(self):
+        pass
+
+
+class FakeClient:
+    def __init__(self, **kwargs):
+        pass
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args):
+        pass
+
+    async def get(self, *args, **kwargs):
+        return FakeResponse()
+
+
 @pytest.mark.asyncio
 class TestTweetIdFetcher:
-    async def test_get_tweet_id(self):
+    async def test_get_tweet_id(self, monkeypatch):
+        monkeypatch.setattr(
+            "funmedia.apps.twitter.utils.httpx.AsyncHTTPTransport",
+            lambda **kwargs: None,
+        )
+        monkeypatch.setattr(
+            "funmedia.apps.twitter.utils.httpx.AsyncClient", FakeClient
+        )
         tweet_link = "https://twitter.com/realDonaldTrump/status/1265255835124539392"
         tweet_id = await TweetIdFetcher.get_tweet_id(tweet_link)
         assert tweet_id == "1265255835124539392"
